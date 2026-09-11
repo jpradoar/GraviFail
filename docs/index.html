@@ -70,11 +70,50 @@
   .cal .panel { text-align: center; }
   .cal .v { font-size: 28px; font-weight: 700; }
   .cal6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+
+  /* Modos */
+  .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .mode { background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 12px; text-align: left; }
+  .mode b { display: block; font-size: 17px; margin-bottom: 4px; }
+  .mode span { font-size: 13px; color: var(--muted); line-height: 1.25; display: block; }
+  .mode.sel { border-color: var(--accent); background: #2a2415; }
+  .mode.sel b { color: var(--accent); }
+  .mode:disabled { opacity: .4; }
+
+  /* Jugadores */
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line);
+    border-radius: 999px; padding: 6px 6px 6px 12px; font-size: 15px; }
+  .chip button { width: auto; padding: 2px 8px; font-size: 14px; border-radius: 999px; background: var(--line); }
+  .addrow { display: flex; gap: 8px; }
+  .addrow input { flex: 1; }
+  .addrow button { width: auto; padding: 10px 16px; }
+
+  /* Nombre en juego */
+  .who { text-align: center; border-radius: 18px; padding: 16px; background: var(--panel); }
+  .who .lbl { font-size: 12px; letter-spacing: 1px; color: var(--muted); font-weight: 700; }
+  .who .name { font-size: 44px; font-weight: 800; line-height: 1.1; }
+  .who.transit { background: #2a2415; }
+  .who.transit .name { color: var(--accent); }
+  .choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choice button { font-size: 24px; font-weight: 700; padding: 22px 10px; }
+  .board { width: 100%; border-collapse: collapse; font-size: 18px; }
+  .board td { padding: 6px 4px; border-bottom: 1px solid var(--line); }
+  .board td:last-child { text-align: right; letter-spacing: 2px; }
+  .board tr.out td { color: var(--muted); text-decoration: line-through; }
+
+  /* Reglas */
+  .rules h2 { font-size: 20px; margin: 6px 0 0; color: var(--accent); }
+  .rules h3 { font-size: 17px; margin: 14px 0 6px; }
+  .rules p, .rules li { font-size: 16px; line-height: 1.4; margin: 0 0 8px; }
+  .rules ol, .rules ul { padding-left: 22px; margin: 0 0 8px; }
+  .rules .tip { background: #1f2a1f; border-left: 4px solid var(--ok); padding: 8px 12px; border-radius: 8px; font-size: 15px; }
+  .rules .req { color: var(--muted); font-size: 14px; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Artefacto Inestable</h1>
+  <h1>GraviFail</h1>
   <span id="badge" class="badge">Sin cubo</span>
 </header>
 
@@ -83,7 +122,17 @@
   <section id="vHome">
     <div id="noBle" class="warn" hidden></div>
     <button id="bConnect" class="primary">Conectar cubo</button>
-    <button id="bStart">Empezar partida</button>
+    <div class="modes" id="modes"></div>
+    <div class="panel">
+      <h3>Jugadores <span class="muted" style="font-weight:400">(para Al azar y Victima)</span></h3>
+      <div class="chips" id="chips"></div>
+      <div class="addrow">
+        <input id="newName" type="text" maxlength="14" placeholder="Nombre" autocomplete="off">
+        <button id="bAddName" class="small">Añadir</button>
+      </div>
+    </div>
+    <button id="bStart" class="primary">Empezar partida</button>
+    <button id="bRules" class="small">Como se juega</button>
     <div class="row">
       <button id="bSettings" class="small">Ajustes</button>
       <button id="bCal" class="small">Calibracion</button>
@@ -95,6 +144,12 @@
 
   <!-- JUEGO -->
   <section id="vPlay" hidden>
+    <div id="who" class="who" hidden><div class="lbl">LE TOCA A</div><div class="name" id="whoName">-</div></div>
+    <div id="choiceWrap" hidden>
+      <div class="muted" style="text-align:center;margin-bottom:8px">Elige a quien le pasas el cubo</div>
+      <div class="choice" id="choice"></div>
+    </div>
+    <div id="turnUI">
     <div class="cards">
       <div id="cardTarget" class="card"><div class="lbl">BUSCA</div><div class="val" id="targetVal">-</div></div>
       <div id="cardLive" class="card none"><div class="lbl">AHORA</div><div class="val" id="liveVal">?</div></div>
@@ -110,6 +165,7 @@
       <span>Limite <b id="limit">0</b> s</span>
     </div>
     <button id="bSimPass" class="primary" hidden>Simular PASS</button>
+    </div>
     <button id="bAbort" class="small">Abortar partida</button>
   </section>
 
@@ -117,6 +173,7 @@
   <section id="vOver" hidden>
     <div class="big" id="overTitle">BOOM</div>
     <div class="panel" style="text-align:center; font-size:18px" id="overBody"></div>
+    <div class="panel" id="boardWrap" hidden><table class="board" id="board"></table></div>
     <button id="bNext" class="primary">Siguiente ronda</button>
     <button id="bHome" class="small">Volver al inicio</button>
   </section>
@@ -124,14 +181,9 @@
   <!-- AJUSTES -->
   <section id="vSettings" hidden>
     <div class="panel">
-      <h3>Modo de partida</h3>
-      <label>Modo
-        <select id="sMode">
-          <option value="libre">Ronda libre: cada BOOM termina la ronda, se cuenta el mejor turno</option>
-          <option value="eliminacion">Eliminacion: quien tiene el cubo al explotar queda fuera, gana el ultimo</option>
-        </select>
-      </label>
-      <label>Jugadores (solo eliminacion)<input id="sPlayers" type="number" min="2" max="12" step="1"></label>
+      <h3>Variantes (aplican a todos los modos)</h3>
+      <label>Jugadores en Eliminacion<input id="sPlayers" type="number" min="2" max="12" step="1"></label>
+      <label>Vidas por jugador en Al azar y Victima<input id="sLives" type="number" min="1" max="5" step="1"></label>
       <label class="check"><input id="sHidden" type="checkbox"> Temporizador oculto: sin pitidos ni cuenta atras, explota cuando quiere</label>
       <label class="check"><input id="sHint" type="checkbox"> Pista de cara opuesta: avisa cuando la cara buscada es la opuesta a la actual</label>
     </div>
@@ -158,6 +210,79 @@
     <button id="bBackSettings" class="small">Volver sin guardar</button>
   </section>
 
+  <!-- REGLAS -->
+  <section id="vRules" hidden>
+    <button id="bBackRulesTop" class="small">Volver</button>
+    <div class="panel rules">
+      <h2>Lo basico, en todos los modos</h2>
+      <p>El movil se deja en el centro de la mesa. Manda el movil, juzga el cubo, y vigila el grupo.</p>
+      <ol>
+        <li>El movil dicta una orden con dos partes: <b>una cara</b> ("cara azul arriba") y <b>un reto</b> ("con una sola mano").</li>
+        <li>Quien tiene el cubo busca la cara. El cubo no lleva marcas: la pantalla muestra en <b>Busca</b> la cara pedida y en <b>Ahora</b> la que el cubo tiene arriba en ese momento. Cuando los dos colores coinciden, vas bien.</li>
+        <li>Mientras buscas, haces el reto. El grupo vigila que lo cumplas. Si no lo cumples, el grupo te lo dice y lo corriges. Sin discusiones largas: el tiempo corre.</li>
+        <li>Con la cara correcta arriba, <b>manten el cubo quieto dos segundos</b>. La barra verde se llena. El cubo da el PASS y el movil grita "Pasalo".</li>
+        <li>Pasas el cubo. Antes de soltarlo puedes girarlo y desordenarlo todo lo que quieras.</li>
+        <li>Si el tiempo llega a cero antes del PASS: <b>BOOM</b>. Quien tiene el cubo en ese momento se lleva la explosion.</li>
+      </ol>
+      <p>Con cada PASS el tiempo del siguiente turno se acorta. Cuando la pantalla parpadea en rojo, queda menos de un tercio.</p>
+      <div class="tip">Si mueves el cubo deprisa, la pantalla no muestra ninguna cara. El cubo solo lee la cara cuando se mueve despacio. Es asi a proposito.</div>
+
+      <h2>Clasico</h2>
+      <p class="req">Sin nombres. De 2 a 8 jugadores.</p>
+      <ul>
+        <li>El cubo va en circulo, siempre hacia el mismo lado. Se decide al empezar.</li>
+        <li>Cada BOOM termina la ronda. La pantalla dice en que turno ha explotado.</li>
+        <li>El objetivo del grupo es batir su <b>record</b> de turnos encadenados. Se guarda en el movil.</li>
+      </ul>
+
+      <h2>Eliminacion</h2>
+      <p class="req">Sin nombres. En Ajustes se indica cuantos jugadores hay.</p>
+      <ul>
+        <li>El cubo va en circulo, como en Clasico.</li>
+        <li>Quien tiene el cubo al explotar <b>queda fuera</b> y sale del circulo.</li>
+        <li>La siguiente ronda empieza con el tiempo inicial completo, para los que quedan.</li>
+        <li>Gana quien queda cuando todos los demas han explotado.</li>
+      </ul>
+
+      <h2>Al azar</h2>
+      <p class="req">Con nombres. Añadelos en la pantalla de inicio. Cada jugador tiene las vidas que marque Ajustes, tres por defecto.</p>
+      <ul>
+        <li>El movil <b>dice un nombre</b>. Quien tiene el cubo se lo lleva a esa persona, aunque este al otro lado de la mesa. Puede desordenarlo por el camino.</li>
+        <li>Dos segundos despues llega la orden y arranca el tiempo, <b>haya llegado el cubo o no</b>. Pasar rapido es parte del juego.</li>
+        <li>Los nombres salen de una bolsa: nadie repite hasta que todos han jugado. Luego se rebaraja. Nunca sabes cuando te toca.</li>
+        <li>Cada BOOM quita <b>una vida</b> a quien tiene el cubo. Sin vidas, fuera de la bolsa.</li>
+        <li>Gana el ultimo con vidas. El marcador se ve entre rondas.</li>
+      </ul>
+
+      <h2>Victima</h2>
+      <p class="req">Con nombres y vidas, como Al azar.</p>
+      <ul>
+        <li>Tras el PASS, quien se ha salvado <b>elige a quien le pasa el cubo</b> tocando su nombre en el movil.</li>
+        <li>No puede elegir a quien se lo acaba de dar. Nada de devoluciones.</li>
+        <li>Al tocar el nombre, el movil lo dice, el cubo viaja y dos segundos despues llega la orden.</li>
+        <li>Tras un BOOM, el siguiente lo decide el azar. Explotar no da derecho a elegir.</li>
+        <li>Cada BOOM quita una vida. Gana el ultimo con vidas.</li>
+      </ul>
+
+      <h2>Variantes</h2>
+      <p>Se activan en Ajustes y valen para cualquier modo.</p>
+      <ul>
+        <li><b>Temporizador oculto.</b> Sin pitidos ni cuenta atras. La bomba explota cuando quiere, un poco antes o un poco despues del tiempo normal. Solo se ve la barra verde del PASS.</li>
+        <li><b>Pista de cara opuesta.</b> Si la cara que buscas es justo la opuesta a la que tienes arriba, la pantalla te lo dice. Para grupos que empiezan o para niños.</li>
+        <li><b>Packs de retos.</b> Bar y oficina, para hacer en publico sin molestar. Fiesta, con mas cuerpo y mas ruido. Familiar y niños, simple y sin picardia. Y los retos que escriba el grupo en la mesa, que suelen ser los mejores.</li>
+      </ul>
+
+      <h2>Dudas frecuentes</h2>
+      <ul>
+        <li><b>Se me ha caido el cubo o lo he soltado antes del PASS.</b> Lo recoges y sigues. El tiempo no se para.</li>
+        <li><b>He dado el PASS sin hacer el reto.</b> El grupo decide: lo normal es que quien pasa el cubo lo haga con el reto ya cumplido. Si no, el grupo se lo devuelve y pierde tiempo del siguiente turno de todos. Con eso basta.</li>
+        <li><b>El cubo no detecta la cara.</b> Muevelo mas despacio y apoyalo plano. Si esta inclinado sobre una arista, no cuenta.</li>
+        <li><b>Hay discusion sobre quien tenia el cubo al explotar.</b> Lo tenia quien lo tocaba. Si lo tocaban dos, la explosion es de quien lo recibia.</li>
+      </ul>
+    </div>
+    <button id="bBackRules" class="small">Volver</button>
+  </section>
+
   <!-- CALIBRACION -->
   <section id="vCal" hidden>
     <div class="cal">
@@ -177,13 +302,21 @@
 'use strict';
 
 // ============================== Constantes ==============================
-const VERSION = 'PoC 0.2';
+const VERSION = 'PoC 0.4';
 const SERVICE_UUID = 'a5c0f000-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const STATUS_UUID  = 'a5c0f001-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const COMMAND_UUID = 'a5c0f002-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const CMD = { SET_TARGET: 0x01, CLEAR: 0x02, SET_HOLD: 0x03 };
 const EVT_PASS = 0x01;
 const OPPOSITE = { 1: 2, 2: 1, 3: 4, 4: 3, 5: 6, 6: 5 };
+const TRANSIT_MS = 2200;   // desde que se dice el nombre hasta que se dicta la orden
+
+const MODES = {
+  clasico:     { name: 'Clasico',     names: false, desc: 'El cubo va en circulo. Cada BOOM termina la ronda. Se guarda el record de turnos.' },
+  eliminacion: { name: 'Eliminacion', names: false, desc: 'Quien tiene el cubo al explotar queda fuera. Gana quien queda. Sin nombres, solo un conteo.' },
+  azar:        { name: 'Al azar',     names: true,  desc: 'La app dice un nombre, el cubo viaja hasta esa persona y entonces llega la orden. Vidas por jugador.' },
+  victima:     { name: 'Victima',     names: true,  desc: 'Quien se salva elige a quien le pasa el cubo. No se puede devolver a quien te lo dio. Vidas por jugador.' },
+};
 
 // Packs de retos. Todos se pueden hacer sentado o de pie junto a una mesa.
 const PACKS = {
@@ -233,7 +366,7 @@ const PACKS = {
 };
 
 const DEFAULTS = {
-  mode: 'libre', players: 4, hidden: false, hint: false,
+  mode: 'clasico', players: 4, lives: 3, names: [], hidden: false, hint: false,
   t0: 15, tMin: 4, factor: 0.9, holdS: 2.0,
   packs: ['bar'],
   custom: [],
@@ -261,20 +394,21 @@ const $ = (id) => document.getElementById(id);
 function loadSettings() {
   const base = JSON.parse(JSON.stringify(DEFAULTS));
   try {
-    const raw = localStorage.getItem('artefacto.settings');
+    const raw = localStorage.getItem('gravifail.settings') || localStorage.getItem('artefacto.settings');
     if (!raw) return base;
     const s = JSON.parse(raw);
     delete s.challenges; // formato de la version 0.1
+    if (s.mode === 'libre') s.mode = 'clasico'; // version 0.2
     return Object.assign(base, s);
   } catch { return base; }
 }
-function saveSettings() { localStorage.setItem('artefacto.settings', JSON.stringify(settings)); }
-function getRecord() { return parseInt(localStorage.getItem('artefacto.record') || '0', 10); }
-function setRecord(n) { localStorage.setItem('artefacto.record', String(n)); }
+function saveSettings() { localStorage.setItem('gravifail.settings', JSON.stringify(settings)); }
+function getRecord() { return parseInt(localStorage.getItem('gravifail.record') || localStorage.getItem('artefacto.record') || '0', 10); }
+function setRecord(n) { localStorage.setItem('gravifail.record', String(n)); }
 
 function renderSettings() {
-  $('sMode').value = settings.mode;
   $('sPlayers').value = settings.players;
+  $('sLives').value = settings.lives;
   $('sHidden').checked = settings.hidden;
   $('sHint').checked = settings.hint;
   $('sT0').value = settings.t0;
@@ -302,8 +436,8 @@ function renderSettings() {
   });
 }
 function readSettingsForm() {
-  settings.mode = $('sMode').value;
   settings.players = clamp(parseInt($('sPlayers').value, 10) || DEFAULTS.players, 2, 12);
+  settings.lives = clamp(parseInt($('sLives').value, 10) || DEFAULTS.lives, 1, 5);
   settings.hidden = $('sHidden').checked;
   settings.hint = $('sHint').checked;
   settings.t0 = clamp(parseFloat($('sT0').value) || DEFAULTS.t0, 3, 60);
@@ -321,12 +455,55 @@ function readSettingsForm() {
 function renderHomeSummary() {
   const packs = settings.packs.map(k => PACKS[k] ? PACKS[k].name : k);
   if (settings.custom.length) packs.push(`${settings.custom.length} propios`);
-  const mode = settings.mode === 'eliminacion' ? `Eliminacion, ${settings.players} jugadores` : 'Ronda libre';
+  const m = MODES[settings.mode] || MODES.clasico;
+  let mode = m.name;
+  if (settings.mode === 'eliminacion') mode += `, ${settings.players} jugadores`;
+  if (m.names) mode += `, ${settings.names.length} jugadores, ${settings.lives} vidas`;
   const extras = [settings.hidden ? 'temporizador oculto' : '', settings.hint ? 'pista de opuesta' : ''].filter(Boolean).join(', ');
   $('homeSummary').innerHTML = `<b>${mode}</b>${extras ? ', ' + extras : ''}<br>
     Retos: ${packs.join(', ') || 'ninguno'}<br>
     Primer turno ${settings.t0} s, minimo ${settings.tMin} s, quieto ${settings.holdS} s<br>
-    Record del grupo en ronda libre: <b>${getRecord()}</b> turnos`;
+    Record del grupo en Clasico: <b>${getRecord()}</b> turnos`;
+}
+
+// ============================== Modos y jugadores ==============================
+function renderModes() {
+  const wrap = $('modes');
+  wrap.innerHTML = '';
+  Object.keys(MODES).forEach(key => {
+    const m = MODES[key];
+    const b = document.createElement('button');
+    b.className = 'mode' + (settings.mode === key ? ' sel' : '');
+    b.innerHTML = `<b>${m.name}</b><span>${m.desc}</span>`;
+    b.onclick = () => { settings.mode = key; saveSettings(); renderModes(); renderHomeSummary(); updateStartButton(); };
+    wrap.appendChild(b);
+  });
+}
+function renderChips() {
+  const wrap = $('chips');
+  wrap.innerHTML = '';
+  if (!settings.names.length) wrap.innerHTML = '<span class="muted">Sin jugadores. Añade al menos dos para Al azar o Victima.</span>';
+  settings.names.forEach((n, i) => {
+    const c = document.createElement('span');
+    c.className = 'chip';
+    c.innerHTML = `${escapeHtml(n)} <button type="button" data-i="${i}" title="Quitar">x</button>`;
+    c.querySelector('button').onclick = () => { settings.names.splice(i, 1); saveSettings(); renderChips(); renderHomeSummary(); updateStartButton(); };
+    wrap.appendChild(c);
+  });
+}
+function addName() {
+  const v = $('newName').value.trim().slice(0, 14);
+  if (!v) return;
+  if (settings.names.length >= 12) { $('newName').value = ''; return; }
+  if (!settings.names.some(n => n.toLowerCase() === v.toLowerCase())) settings.names.push(v);
+  $('newName').value = '';
+  saveSettings(); renderChips(); renderHomeSummary(); updateStartButton();
+  $('newName').focus();
+}
+function updateStartButton() {
+  const needNames = MODES[settings.mode].names && settings.names.length < 2;
+  $('bStart').disabled = needNames;
+  $('bStart').textContent = needNames ? 'Añade al menos dos jugadores' : 'Empezar partida';
 }
 
 // ============================== Baraja de retos ==============================
@@ -349,8 +526,9 @@ function shuffle(a) {
 
 // ============================== Navegacion ==============================
 function show(view) {
-  ['vHome', 'vPlay', 'vOver', 'vSettings', 'vCal'].forEach(v => $(v).hidden = (v !== view));
-  if (view === 'vHome') renderHomeSummary();
+  ['vHome', 'vPlay', 'vOver', 'vSettings', 'vCal', 'vRules'].forEach(v => $(v).hidden = (v !== view));
+  window.scrollTo(0, 0);
+  if (view === 'vHome') { renderModes(); renderChips(); renderHomeSummary(); updateStartButton(); }
 }
 
 // ============================== Bluetooth ==============================
@@ -366,7 +544,7 @@ async function connect() {
   if (ble.connected) { if (ble.device && ble.device.gatt) ble.device.gatt.disconnect(); return; }
   try {
     const device = await navigator.bluetooth.requestDevice({
-      filters: [{ services: [SERVICE_UUID] }, { namePrefix: 'Artefacto' }],
+      filters: [{ services: [SERVICE_UUID] }, { namePrefix: 'GraviFail' }],
       optionalServices: [SERVICE_UUID],
     });
     device.addEventListener('gattserverdisconnected', onDisconnected);
@@ -509,13 +687,21 @@ async function requestWakeLock() {
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && game) requestWakeLock(); });
 
 // ============================== Juego ==============================
+function namedMode() { return game && MODES[game.mode].names; }
+function alivePlayers() { return game.players.filter(p => p.lives > 0); }
+
 function startGame() {
   ensureAudio();
   requestWakeLock();
+  const named = MODES[settings.mode].names;
   game = {
     sim: !ble.connected,
     mode: settings.mode,
     playersLeft: settings.players,
+    players: named ? settings.names.map(n => ({ name: n, lives: settings.lives })) : [],
+    bag: [],
+    current: -1,   // indice del jugador que tiene el cubo
+    prev: -1,      // quien se lo paso
     round: 1,
     turn: 0,
     limitMs: settings.t0 * 1000,
@@ -531,21 +717,98 @@ function startGame() {
   setBadge();
   show('vPlay');
   renderCube();
-  const intro = game.mode === 'eliminacion' ? `${game.playersLeft} jugadores. Quien explote, fuera.` : 'Ronda libre.';
+  $('who').hidden = !named;
+  $('choiceWrap').hidden = true;
+  $('turnUI').hidden = false;
+  let intro;
+  if (game.mode === 'eliminacion') intro = `${game.playersLeft} jugadores. Quien explote, fuera.`;
+  else if (game.mode === 'azar') intro = `${game.players.length} jugadores, ${settings.lives} vidas. Atentos al nombre.`;
+  else if (game.mode === 'victima') intro = `${game.players.length} jugadores, ${settings.lives} vidas. Quien se salva elige.`;
+  else intro = 'Modo clasico.';
   speak(`${game.sim ? 'Modo simulacion. ' : ''}${intro} Preparados.`);
-  setTimeout(nextTurn, 2200);
+  setTimeout(beginTurn, 2400);
+}
+
+// Decide quien juega y, en modos con nombre, anuncia el nombre antes de la orden
+function beginTurn(chosenIdx) {
+  if (!game) return;
+  if (!namedMode()) { nextTurn(); return; }
+  let idx = chosenIdx;
+  if (idx === undefined) idx = drawFromBag();
+  game.prev = game.current;
+  game.current = idx;
+  const p = game.players[idx];
+  $('who').className = 'who transit';
+  $('whoName').textContent = p.name;
+  $('choiceWrap').hidden = true;
+  $('turnUI').hidden = false;
+  $('challenge').textContent = 'el cubo viaja...';
+  $('targetVal').textContent = '-';
+  $('cardTarget').style.background = '';
+  $('cardTarget').className = 'card none';
+  $('timer').textContent = '';
+  speak(`¡${p.name}!`, 1.0);
+  game.transitTimer = setTimeout(() => { $('who').className = 'who'; nextTurn(); }, TRANSIT_MS);
+}
+
+function drawFromBag() {
+  const alive = game.players.map((p, i) => p.lives > 0 ? i : -1).filter(i => i >= 0);
+  game.bag = game.bag.filter(i => game.players[i].lives > 0);
+  if (!game.bag.length) game.bag = shuffle(alive.slice());
+  // Evitar repetir al mismo justo despues de rebarajar, si hay alternativa
+  if (game.bag.length > 1 && game.bag[game.bag.length - 1] === game.current) {
+    game.bag.unshift(game.bag.pop());
+  }
+  return game.bag.pop();
+}
+
+// Modo victima: quien acaba de pasar elige al siguiente
+function showChoice() {
+  const wrap = $('choice');
+  wrap.innerHTML = '';
+  const alive = game.players.map((p, i) => p.lives > 0 ? i : -1).filter(i => i >= 0);
+  let options = alive.filter(i => i !== game.current && i !== game.prev);
+  if (!options.length) options = alive.filter(i => i !== game.current);
+  options.forEach(i => {
+    const b = document.createElement('button');
+    b.textContent = game.players[i].name;
+    b.onclick = () => { if (game) beginTurn(i); };
+    wrap.appendChild(b);
+  });
+  $('turnUI').hidden = true;
+  $('choiceWrap').hidden = false;
+  $('who').className = 'who';
+  $('whoName').textContent = `${game.players[game.current].name} elige`;
+}
+
+function renderBoard() {
+  const t = $('board');
+  t.innerHTML = '';
+  game.players.forEach(p => {
+    const tr = document.createElement('tr');
+    if (p.lives <= 0) tr.className = 'out';
+    tr.innerHTML = `<td>${escapeHtml(p.name)}</td><td>${'●'.repeat(p.lives)}${'○'.repeat(Math.max(0, settings.lives - p.lives))}</td>`;
+    t.appendChild(tr);
+  });
+  $('boardWrap').hidden = false;
 }
 
 function startRound() {
-  // Siguiente ronda en modo eliminacion: se reinicia el tiempo, la baraja continua
+  // Siguiente ronda: se reinicia el tiempo, la baraja de retos continua
   game.round++;
   game.turn = 0;
   game.limitMs = settings.t0 * 1000;
   game.lastFace = 0;
   show('vPlay');
   $('bSimPass').hidden = !game.sim;
-  speak(`Quedan ${game.playersLeft}. Preparados.`);
-  setTimeout(nextTurn, 1800);
+  if (namedMode()) {
+    speak(`Quedan ${alivePlayers().length}. Preparados.`);
+    // En victima, tras un BOOM el siguiente lo decide el azar para no premiar al eliminado
+    setTimeout(() => beginTurn(), 1800);
+  } else {
+    speak(`Quedan ${game.playersLeft}. Preparados.`);
+    setTimeout(nextTurn, 1800);
+  }
 }
 
 function pickFace() {
@@ -570,12 +833,15 @@ function nextTurn() {
   // Temporizador oculto: duracion aleatoria entre 60 % y 140 % del limite actual
   game.turnLimitMs = settings.hidden ? game.limitMs * (0.6 + Math.random() * 0.8) : game.limitMs;
 
+  $('cardTarget').className = 'card';
   $('cardTarget').style.background = f.color;
   $('targetVal').textContent = f.name.toUpperCase();
   $('challenge').textContent = challenge;
   $('turnNo').textContent = game.turn;
   $('limit').textContent = settings.hidden ? '?' : (game.limitMs / 1000).toFixed(1);
-  $('playersStat').textContent = game.mode === 'eliminacion' ? `Quedan ${game.playersLeft}` : `Record ${getRecord()}`;
+  if (game.mode === 'eliminacion') $('playersStat').textContent = `Quedan ${game.playersLeft}`;
+  else if (namedMode()) $('playersStat').textContent = `Vidas ${game.players[game.current].lives}`;
+  else $('playersStat').textContent = `Record ${getRecord()}`;
   $('holdBar').style.width = '0%';
   $('timeBarWrap').style.visibility = settings.hidden ? 'hidden' : 'visible';
   $('timer').textContent = settings.hidden ? '??' : (game.limitMs / 1000).toFixed(1);
@@ -631,9 +897,11 @@ function onPass() {
   $('timeBar').style.width = '100%';
   $('holdBar').style.width = '100%';
   $('hint').textContent = '';
-  if (game.mode === 'libre' && game.turn > getRecord()) setRecord(game.turn);
+  if (game.mode === 'clasico' && game.turn > getRecord()) setRecord(game.turn);
   game.limitMs = Math.max(settings.tMin * 1000, game.limitMs * settings.factor);
-  setTimeout(nextTurn, 1400);
+  if (game.mode === 'victima') setTimeout(() => { if (game) showChoice(); }, 900);
+  else if (game.mode === 'azar') setTimeout(() => beginTurn(), 900);
+  else setTimeout(nextTurn, 1400);
 }
 
 function onTimeout() {
@@ -647,8 +915,31 @@ function onTimeout() {
   $('hint').textContent = '';
 
   const faltaba = `Faltaba: cara ${faceLabel(game.face)} arriba, ${game.challenge}.`;
+  $('boardWrap').hidden = true;
 
-  if (game.mode === 'eliminacion') {
+  if (namedMode()) {
+    const p = game.players[game.current];
+    p.lives--;
+    const alive = alivePlayers();
+    renderBoard();
+    if (alive.length <= 1) {
+      const winner = alive.length ? alive[0].name : p.name;
+      speak(`¡Boom! ${p.name} fuera. ¡Gana ${winner}!`, 1.0);
+      setTimeout(sfxWin, 1800);
+      $('overTitle').textContent = `GANA ${winner.toUpperCase()}`;
+      $('overBody').innerHTML = `${game.round} rondas.<br><span class="muted">${faltaba}</span>`;
+      $('bNext').textContent = 'Nueva partida';
+      $('bNext').onclick = startGame;
+      game = null;
+    } else {
+      const out = p.lives <= 0;
+      speak(out ? `¡Boom! ${p.name} queda fuera.` : `¡Boom! ${p.name} pierde una vida. Le quedan ${p.lives}.`, 1.0);
+      $('overTitle').textContent = out ? 'ELIMINADO' : 'BOOM';
+      $('overBody').innerHTML = `<b>${escapeHtml(p.name)}</b> ${out ? 'queda fuera de la partida' : `pierde una vida, le quedan ${p.lives}`}.<br><span class="muted">${faltaba}</span>`;
+      $('bNext').textContent = 'Siguiente ronda';
+      $('bNext').onclick = startRound;
+    }
+  } else if (game.mode === 'eliminacion') {
     game.playersLeft--;
     if (game.playersLeft <= 1) {
       speak('¡Boom! Fuera. Queda uno. ¡Tenemos ganador!', 1.0);
@@ -681,7 +972,7 @@ function onTimeout() {
 }
 
 function abortGame() {
-  if (game) { stopTurnTimers(); if (!game.sim) sendClear(); }
+  if (game) { stopTurnTimers(); clearTimeout(game.transitTimer); if (!game.sim) sendClear(); }
   game = null;
   if (window.speechSynthesis) speechSynthesis.cancel();
   setBadge();
@@ -743,8 +1034,13 @@ $('bStart').onclick = startGame;
 $('bSettings').onclick = () => { renderSettings(); show('vSettings'); };
 $('bCal').onclick = () => { renderCalTargets(); renderCube(); show('vCal'); };
 $('bSaveSettings').onclick = () => { readSettingsForm(); sendHold(); show('vHome'); };
-$('bResetSettings').onclick = () => { settings = JSON.parse(JSON.stringify(DEFAULTS)); saveSettings(); renderSettings(); };
+$('bResetSettings').onclick = () => { const names = settings.names; settings = JSON.parse(JSON.stringify(DEFAULTS)); settings.names = names; saveSettings(); renderSettings(); };
+$('bAddName').onclick = addName;
+$('newName').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addName(); } });
 $('bBackSettings').onclick = () => show('vHome');
+$('bRules').onclick = () => show('vRules');
+$('bBackRules').onclick = () => show('vHome');
+$('bBackRulesTop').onclick = () => show('vHome');
 $('bBackCal').onclick = () => { sendClear(); show('vHome'); };
 $('bAbort').onclick = abortGame;
 $('bSimPass').onclick = () => { if (game && game.sim) onPass(); };
@@ -753,7 +1049,7 @@ document.addEventListener('keydown', (e) => { if (e.key === 'p' && game && game.
 
 setBadge();
 renderCube();
-renderHomeSummary();
+show('vHome');
 </script>
 </body>
 </html>
