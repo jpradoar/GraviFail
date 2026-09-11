@@ -13,7 +13,11 @@
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text);
     font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
-  body { display: flex; flex-direction: column; min-height: 100dvh; }
+  body { display: flex; flex-direction: column; min-height: 100dvh; transition: background .15s; }
+  body.flash-ok { background: #1f7a3a; }
+  body.flash-bad { background: #8a1c1c; }
+  body.urgent { animation: pulse .5s infinite alternate; }
+  @keyframes pulse { from { background: var(--bg); } to { background: #3a1010; } }
   header { display: flex; align-items: center; justify-content: space-between;
     padding: 12px 16px; border-bottom: 1px solid var(--line); }
   header h1 { font-size: 18px; margin: 0; letter-spacing: .5px; }
@@ -26,28 +30,36 @@
   button { font: inherit; font-size: 18px; padding: 16px; border-radius: 14px; border: 0;
     background: var(--panel); color: var(--text); width: 100%; cursor: pointer; }
   button.primary { background: var(--accent); color: #221; font-weight: 700; }
-  button.danger { background: var(--bad); color: #fff; }
   button.small { font-size: 14px; padding: 10px; }
   button:disabled { opacity: .45; cursor: default; }
   .row { display: flex; gap: 10px; }
   .row > * { flex: 1; }
   .panel { background: var(--panel); border-radius: 14px; padding: 14px; }
+  .panel h3 { margin: 0 0 10px; font-size: 15px; color: var(--muted); font-weight: 600; }
   .muted { color: var(--muted); font-size: 14px; }
   .warn { background: #3a2a12; color: #ffd98a; border-radius: 12px; padding: 12px; font-size: 14px; }
-  label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
-  input, textarea { font: inherit; font-size: 16px; padding: 10px; border-radius: 10px;
+  label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); margin-bottom: 10px; }
+  label.check { flex-direction: row; align-items: center; gap: 10px; color: var(--text); }
+  label.check input { width: 22px; height: 22px; }
+  input, textarea, select { font: inherit; font-size: 16px; padding: 10px; border-radius: 10px;
     border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; }
-  textarea { min-height: 160px; resize: vertical; }
+  textarea { min-height: 120px; resize: vertical; }
   .faces { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .faces label { flex-direction: row; align-items: center; gap: 8px; }
+  .faces label { flex-direction: row; align-items: center; gap: 8px; margin: 0; }
   .faces input[type=color] { width: 44px; height: 40px; padding: 2px; }
   .faces input[type=text] { flex: 1; }
 
   /* Vista de juego */
-  .facecard { border-radius: 20px; padding: 28px 16px; text-align: center; color: #111;
-    font-size: 40px; font-weight: 800; text-shadow: 0 1px 0 rgba(255,255,255,.4); }
-  .challenge { text-align: center; font-size: 26px; font-weight: 600; line-height: 1.25; min-height: 66px; }
-  .timer { font-size: 72px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; line-height: 1; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card { border-radius: 18px; padding: 14px 10px; text-align: center; color: #111; min-height: 120px;
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
+    text-shadow: 0 1px 0 rgba(255,255,255,.35); }
+  .card .lbl { font-size: 12px; font-weight: 700; letter-spacing: 1px; opacity: .7; }
+  .card .val { font-size: 30px; font-weight: 800; line-height: 1.05; }
+  .card.none { background: var(--panel); color: var(--muted); text-shadow: none; }
+  .hint { text-align: center; font-size: 15px; color: var(--accent); min-height: 20px; font-weight: 600; }
+  .challenge { text-align: center; font-size: 28px; font-weight: 700; line-height: 1.2; min-height: 70px; }
+  .timer { font-size: 84px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; line-height: 1; }
   .timer.urgent { color: var(--bad); }
   .bar { height: 14px; background: var(--line); border-radius: 999px; overflow: hidden; }
   .bar > div { height: 100%; width: 100%; background: var(--accent); transition: width .1s linear; }
@@ -76,56 +88,74 @@
       <button id="bSettings" class="small">Ajustes</button>
       <button id="bCal" class="small">Calibracion</button>
     </div>
-    <p class="muted">Sin cubo conectado la partida arranca en modo simulacion: el PASS se da con un boton.
-      Sirve para probar la web sin hardware.</p>
+    <div class="panel muted" id="homeSummary"></div>
+    <p class="muted">Sin cubo conectado la partida arranca en modo simulacion: el PASS se da con un boton o la tecla P.</p>
     <p class="muted" id="version"></p>
   </section>
 
   <!-- JUEGO -->
   <section id="vPlay" hidden>
-    <div id="faceCard" class="facecard">Cara</div>
+    <div class="cards">
+      <div id="cardTarget" class="card"><div class="lbl">BUSCA</div><div class="val" id="targetVal">-</div></div>
+      <div id="cardLive" class="card none"><div class="lbl">AHORA</div><div class="val" id="liveVal">?</div></div>
+    </div>
+    <div id="hint" class="hint"></div>
     <div id="challenge" class="challenge"></div>
     <div id="timer" class="timer">0.0</div>
-    <div class="bar"><div id="timeBar"></div></div>
+    <div class="bar" id="timeBarWrap"><div id="timeBar"></div></div>
     <div class="bar hold"><div id="holdBar"></div></div>
     <div class="stats">
       <span>Turno <b id="turnNo">0</b></span>
-      <span>Cubo: <b id="liveFace">-</b></span>
+      <span id="playersStat"></span>
       <span>Limite <b id="limit">0</b> s</span>
     </div>
     <button id="bSimPass" class="primary" hidden>Simular PASS</button>
-    <button id="bAbort" class="small">Abortar ronda</button>
+    <button id="bAbort" class="small">Abortar partida</button>
   </section>
 
-  <!-- FIN DE RONDA -->
+  <!-- FIN DE RONDA / ELIMINACION -->
   <section id="vOver" hidden>
-    <div class="big">BOOM</div>
-    <div class="panel" style="text-align:center">
-      Ronda terminada en el turno <b id="overTurn">0</b>.<br>
-      <span class="muted" id="overDetail"></span>
-    </div>
-    <button id="bAgain" class="primary">Otra ronda</button>
+    <div class="big" id="overTitle">BOOM</div>
+    <div class="panel" style="text-align:center; font-size:18px" id="overBody"></div>
+    <button id="bNext" class="primary">Siguiente ronda</button>
     <button id="bHome" class="small">Volver al inicio</button>
   </section>
 
   <!-- AJUSTES -->
   <section id="vSettings" hidden>
     <div class="panel">
+      <h3>Modo de partida</h3>
+      <label>Modo
+        <select id="sMode">
+          <option value="libre">Ronda libre: cada BOOM termina la ronda, se cuenta el mejor turno</option>
+          <option value="eliminacion">Eliminacion: quien tiene el cubo al explotar queda fuera, gana el ultimo</option>
+        </select>
+      </label>
+      <label>Jugadores (solo eliminacion)<input id="sPlayers" type="number" min="2" max="12" step="1"></label>
+      <label class="check"><input id="sHidden" type="checkbox"> Temporizador oculto: sin pitidos ni cuenta atras, explota cuando quiere</label>
+      <label class="check"><input id="sHint" type="checkbox"> Pista de cara opuesta: avisa cuando la cara buscada es la opuesta a la actual</label>
+    </div>
+    <div class="panel">
+      <h3>Tiempos</h3>
       <label>Tiempo del primer turno (s)<input id="sT0" type="number" min="3" max="60" step="1"></label>
       <label>Tiempo minimo por turno (s)<input id="sTmin" type="number" min="2" max="60" step="1"></label>
       <label>Factor de reduccion por turno (0.5 a 1)<input id="sFactor" type="number" min="0.5" max="1" step="0.01"></label>
       <label>Segundos quieto para dar PASS<input id="sHold" type="number" min="0.5" max="5" step="0.1"></label>
     </div>
     <div class="panel">
-      <div class="muted" style="margin-bottom:8px">Caras del cubo (nombre y color de cada una). El numero es el que devuelve el sensor. Usa Calibracion para saber cual es cual.</div>
-      <div id="facesEdit" class="faces"></div>
+      <h3>Packs de retos</h3>
+      <div id="packsEdit"></div>
+      <label>Retos propios, uno por linea<textarea id="sCustom" placeholder="con el sombrero de Juan puesto&#10;mientras imitas a un gato"></textarea></label>
+      <div class="muted">Los retos no se repiten dentro de una partida hasta agotar la baraja.</div>
     </div>
     <div class="panel">
-      <label>Retos sociales, uno por linea<textarea id="sChallenges"></textarea></label>
+      <h3>Caras del cubo</h3>
+      <div class="muted" style="margin-bottom:8px">Nombre y color que se muestran en pantalla. El cubo fisico no lleva marcas.</div>
+      <div id="facesEdit" class="faces"></div>
     </div>
     <button id="bSaveSettings" class="primary">Guardar</button>
     <button id="bResetSettings" class="small">Restaurar valores por defecto</button>
-    <button id="bBackSettings" class="small">Volver</button>
+    <button id="bBackSettings" class="small">Volver sin guardar</button>
   </section>
 
   <!-- CALIBRACION -->
@@ -136,8 +166,7 @@
       <div class="panel"><div class="muted">Objetivo</div><div class="v" id="cTarget">-</div></div>
       <div class="panel"><div class="muted">Progreso</div><div class="v" id="cProg">0%</div></div>
     </div>
-    <div class="muted">Coloca el cubo con una cara arriba, mira el numero, y pon la pegatina de ese nombre y color. Repite con las seis caras.</div>
-    <div class="muted">Prueba de PASS: fija un objetivo y manten el cubo quieto en esa cara.</div>
+    <div class="muted">Herramienta de prueba. Fija un objetivo y manten el cubo quieto en esa cara para comprobar el PASS.</div>
     <div id="calTargets" class="cal6"></div>
     <div class="panel" id="cLog" style="font-family:monospace;font-size:13px;min-height:40px">-</div>
     <button id="bBackCal" class="small">Volver</button>
@@ -148,15 +177,66 @@
 'use strict';
 
 // ============================== Constantes ==============================
-const VERSION = 'PoC 0.1';
+const VERSION = 'PoC 0.2';
 const SERVICE_UUID = 'a5c0f000-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const STATUS_UUID  = 'a5c0f001-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const COMMAND_UUID = 'a5c0f002-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const CMD = { SET_TARGET: 0x01, CLEAR: 0x02, SET_HOLD: 0x03 };
 const EVT_PASS = 0x01;
+const OPPOSITE = { 1: 2, 2: 1, 3: 4, 4: 3, 5: 6, 6: 5 };
+
+// Packs de retos. Todos se pueden hacer sentado o de pie junto a una mesa.
+const PACKS = {
+  bar: {
+    name: 'Bar y oficina',
+    desc: 'Se puede hacer en publico sin molestar demasiado.',
+    items: [
+      'con una sola mano', 'con la mano que no usas normalmente', 'con los ojos cerrados',
+      'sobre tu cabeza', 'con los codos pegados al cuerpo', 'sin usar los pulgares',
+      'con las manos por detras de la espalda', 'con el brazo completamente estirado',
+      'mirando al techo', 'de pie', 'de espaldas a la mesa', 'apoyando solo los meñiques',
+      'con el cubo pegado a la barbilla', 'sin doblar los codos', 'con las dos manos juntas como si rezaras',
+      'por debajo de la mesa', 'a la altura de los ojos de la persona de tu izquierda',
+      'mientras dices el abecedario', 'mientras cuentas hacia atras desde veinte',
+      'sin dejar de mirar a la persona de tu derecha', 'con una ceja levantada',
+      'susurrando lo que haces', 'con el cubo apoyado en el hombro', 'sin que se te vean los dientes',
+      'con la cabeza inclinada hacia un lado', 'mientras silbas',
+    ],
+  },
+  fiesta: {
+    name: 'Fiesta',
+    desc: 'Mas ruido, mas cuerpo, mas ridiculo.',
+    items: [
+      'a la pata coja', 'de rodillas', 'mientras cantas', 'con la lengua fuera',
+      'bailando sin parar', 'con voz de robot narrando cada movimiento', 'mientras das vueltas sobre ti mismo',
+      'sentado en el suelo', 'con el cubo entre las rodillas', 'imitando a un animal que elija el grupo',
+      'con acento raro explicando lo que haces', 'en cuclillas', 'con una mano en la cadera todo el rato',
+      'gritando cada vez que gires el cubo', 'con cara de enfado', 'riendo sin parar',
+      'con los ojos cerrados y girando sobre ti mismo', 'saltando', 'como si el cubo pesara cien kilos',
+      'a camara lenta', 'como si fuera una bomba de verdad', 'con el cubo sobre el dorso de la mano',
+      'mientras el resto te abuchea', 'mirando fijamente a quien te lo paso', 'de puntillas',
+    ],
+  },
+  familiar: {
+    name: 'Familiar y niños',
+    desc: 'Retos simples y fisicos, sin picardia.',
+    items: [
+      'sobre tu cabeza', 'con una sola mano', 'con los ojos cerrados', 'de pie', 'de rodillas',
+      'a la pata coja', 'sentado en el suelo', 'con el cubo muy lejos del cuerpo', 'con el cubo muy cerca de la nariz',
+      'diciendo un animal por cada giro', 'contando en voz alta', 'con voz de bebe', 'con voz muy grave',
+      'con la boca abierta', 'como un robot', 'como una tortuga', 'como un pirata',
+      'dando un salto antes de empezar', 'aplaudiendo primero tres veces', 'con las rodillas juntas',
+      'sin mover los pies', 'de puntillas', 'con el cubo debajo de la barbilla', 'con los brazos muy arriba',
+      'mientras cantas cumpleaños feliz',
+    ],
+  },
+};
 
 const DEFAULTS = {
+  mode: 'libre', players: 4, hidden: false, hint: false,
   t0: 15, tMin: 4, factor: 0.9, holdS: 2.0,
+  packs: ['bar'],
+  custom: [],
   faces: [
     { name: 'Roja',     color: '#e63946' },
     { name: 'Azul',     color: '#3a86ff' },
@@ -165,52 +245,53 @@ const DEFAULTS = {
     { name: 'Blanca',   color: '#f1f1f1' },
     { name: 'Naranja',  color: '#ff8c1a' },
   ],
-  challenges: [
-    'sobre tu cabeza',
-    'con una sola mano',
-    'con los ojos cerrados',
-    'a la pata coja',
-    'de pie y sin doblar las rodillas',
-    'con los codos pegados al cuerpo',
-    'sin usar los pulgares',
-    'con las manos por detras de la espalda',
-    'de rodillas',
-    'por debajo de la mesa',
-    'con el brazo completamente estirado',
-    'mientras cantas',
-    'con la lengua fuera',
-    'mirando al techo',
-    'de espaldas a la mesa',
-  ],
 };
 
 // ============================== Estado ==============================
 let settings = loadSettings();
 let ble = { device: null, cmd: null, connected: false };
 let cube = { face: 0, stable: 0, progress: 0, target: 0 };
-let game = null;      // null cuando no hay ronda
-let audio = null;     // AudioContext, se crea tras un toque del usuario
+let game = null;
+let audio = null;
 let wakeLock = null;
 
 const $ = (id) => document.getElementById(id);
 
 // ============================== Ajustes ==============================
 function loadSettings() {
+  const base = JSON.parse(JSON.stringify(DEFAULTS));
   try {
     const raw = localStorage.getItem('artefacto.settings');
-    if (!raw) return structuredClone(DEFAULTS);
+    if (!raw) return base;
     const s = JSON.parse(raw);
-    return { ...structuredClone(DEFAULTS), ...s };
-  } catch { return structuredClone(DEFAULTS); }
+    delete s.challenges; // formato de la version 0.1
+    return Object.assign(base, s);
+  } catch { return base; }
 }
 function saveSettings() { localStorage.setItem('artefacto.settings', JSON.stringify(settings)); }
+function getRecord() { return parseInt(localStorage.getItem('artefacto.record') || '0', 10); }
+function setRecord(n) { localStorage.setItem('artefacto.record', String(n)); }
 
 function renderSettings() {
+  $('sMode').value = settings.mode;
+  $('sPlayers').value = settings.players;
+  $('sHidden').checked = settings.hidden;
+  $('sHint').checked = settings.hint;
   $('sT0').value = settings.t0;
   $('sTmin').value = settings.tMin;
   $('sFactor').value = settings.factor;
   $('sHold').value = settings.holdS;
-  $('sChallenges').value = settings.challenges.join('\n');
+  $('sCustom').value = settings.custom.join('\n');
+  const pw = $('packsEdit');
+  pw.innerHTML = '';
+  Object.keys(PACKS).forEach(key => {
+    const p = PACKS[key];
+    const l = document.createElement('label');
+    l.className = 'check';
+    l.innerHTML = `<input type="checkbox" data-pack="${key}" ${settings.packs.includes(key) ? 'checked' : ''}>
+                   <span><b>${p.name}</b> (${p.items.length}) <span class="muted">${p.desc}</span></span>`;
+    pw.appendChild(l);
+  });
   const wrap = $('facesEdit');
   wrap.innerHTML = '';
   settings.faces.forEach((f, i) => {
@@ -221,22 +302,55 @@ function renderSettings() {
   });
 }
 function readSettingsForm() {
+  settings.mode = $('sMode').value;
+  settings.players = clamp(parseInt($('sPlayers').value, 10) || DEFAULTS.players, 2, 12);
+  settings.hidden = $('sHidden').checked;
+  settings.hint = $('sHint').checked;
   settings.t0 = clamp(parseFloat($('sT0').value) || DEFAULTS.t0, 3, 60);
   settings.tMin = clamp(parseFloat($('sTmin').value) || DEFAULTS.tMin, 2, 60);
   settings.factor = clamp(parseFloat($('sFactor').value) || DEFAULTS.factor, 0.5, 1);
   settings.holdS = clamp(parseFloat($('sHold').value) || DEFAULTS.holdS, 0.5, 5);
-  const lines = $('sChallenges').value.split('\n').map(s => s.trim()).filter(Boolean);
-  settings.challenges = lines.length ? lines : structuredClone(DEFAULTS.challenges);
+  settings.custom = $('sCustom').value.split('\n').map(s => s.trim()).filter(Boolean);
+  settings.packs = Array.from($('packsEdit').querySelectorAll('input:checked')).map(i => i.dataset.pack);
   $('facesEdit').querySelectorAll('input').forEach(inp => {
     const f = settings.faces[+inp.dataset.i];
     f[inp.dataset.k] = inp.dataset.k === 'name' ? (inp.value.trim() || `Cara ${+inp.dataset.i + 1}`) : inp.value;
   });
   saveSettings();
 }
+function renderHomeSummary() {
+  const packs = settings.packs.map(k => PACKS[k] ? PACKS[k].name : k);
+  if (settings.custom.length) packs.push(`${settings.custom.length} propios`);
+  const mode = settings.mode === 'eliminacion' ? `Eliminacion, ${settings.players} jugadores` : 'Ronda libre';
+  const extras = [settings.hidden ? 'temporizador oculto' : '', settings.hint ? 'pista de opuesta' : ''].filter(Boolean).join(', ');
+  $('homeSummary').innerHTML = `<b>${mode}</b>${extras ? ', ' + extras : ''}<br>
+    Retos: ${packs.join(', ') || 'ninguno'}<br>
+    Primer turno ${settings.t0} s, minimo ${settings.tMin} s, quieto ${settings.holdS} s<br>
+    Record del grupo en ronda libre: <b>${getRecord()}</b> turnos`;
+}
+
+// ============================== Baraja de retos ==============================
+function buildDeck() {
+  let items = [];
+  settings.packs.forEach(k => { if (PACKS[k]) items = items.concat(PACKS[k].items); });
+  items = items.concat(settings.custom);
+  items = Array.from(new Set(items));
+  if (!items.length) items = PACKS.bar.items.slice();
+  return shuffle(items);
+}
+function drawChallenge() {
+  if (!game.deck.length) game.deck = buildDeck();
+  return game.deck.pop();
+}
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
 
 // ============================== Navegacion ==============================
 function show(view) {
   ['vHome', 'vPlay', 'vOver', 'vSettings', 'vCal'].forEach(v => $(v).hidden = (v !== view));
+  if (view === 'vHome') renderHomeSummary();
 }
 
 // ============================== Bluetooth ==============================
@@ -305,14 +419,33 @@ function onStatus(ev) {
   }
 }
 
+function faceLabel(f) { return f ? settings.faces[f - 1].name : '-'; }
+
 function renderCube() {
-  const fname = (f) => f ? `${f} ${settings.faces[f - 1].name}` : '-';
+  const fname = (f) => f ? `${f} ${faceLabel(f)}` : '-';
   $('cFace').textContent = fname(cube.face);
   $('cStable').textContent = cube.stable ? 'si' : 'no';
   $('cTarget').textContent = fname(cube.target);
   $('cProg').textContent = `${cube.progress}%`;
-  $('liveFace').textContent = fname(cube.face);
   $('holdBar').style.width = `${cube.progress}%`;
+
+  // Tarjeta AHORA
+  const card = $('cardLive');
+  if (cube.face) {
+    card.className = 'card';
+    card.style.background = settings.faces[cube.face - 1].color;
+    $('liveVal').textContent = faceLabel(cube.face).toUpperCase();
+  } else {
+    card.className = 'card none';
+    card.style.background = '';
+    $('liveVal').textContent = game && game.sim ? 'SIM' : '?';
+  }
+  // Pista de cara opuesta
+  if (game && game.waiting && settings.hint && cube.face && OPPOSITE[cube.face] === game.face) {
+    $('hint').textContent = 'Es la opuesta: dale la vuelta';
+  } else {
+    $('hint').textContent = '';
+  }
 }
 
 // ============================== Audio ==============================
@@ -332,6 +465,7 @@ function tone(freq, dur, type = 'square', gain = 0.25, when = 0) {
 }
 function sfxTick(urgency) { tone(700 + 600 * urgency, 0.05, 'square', 0.15); }
 function sfxSuccess() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, 'triangle', 0.3, i * 0.09)); }
+function sfxWin() { [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, 0.22, 'triangle', 0.3, i * 0.12)); }
 function sfxBoom() {
   if (!audio) return;
   const dur = 1.4;
@@ -363,6 +497,12 @@ function speak(text, rate = 1.05) {
   speechSynthesis.speak(u);
 }
 
+function flash(cls, ms) {
+  document.body.classList.remove('urgent');
+  document.body.classList.add(cls);
+  setTimeout(() => document.body.classList.remove(cls), ms);
+}
+
 async function requestWakeLock() {
   try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch {}
 }
@@ -374,9 +514,14 @@ function startGame() {
   requestWakeLock();
   game = {
     sim: !ble.connected,
+    mode: settings.mode,
+    playersLeft: settings.players,
+    round: 1,
     turn: 0,
     limitMs: settings.t0 * 1000,
+    deck: buildDeck(),
     lastFace: 0,
+    face: 0,
     waiting: false,
     turnStart: 0,
     tickTimer: null,
@@ -385,8 +530,22 @@ function startGame() {
   $('bSimPass').hidden = !game.sim;
   setBadge();
   show('vPlay');
-  speak(game.sim ? 'Modo simulacion. Preparados.' : 'Preparados.');
-  setTimeout(nextTurn, 1500);
+  renderCube();
+  const intro = game.mode === 'eliminacion' ? `${game.playersLeft} jugadores. Quien explote, fuera.` : 'Ronda libre.';
+  speak(`${game.sim ? 'Modo simulacion. ' : ''}${intro} Preparados.`);
+  setTimeout(nextTurn, 2200);
+}
+
+function startRound() {
+  // Siguiente ronda en modo eliminacion: se reinicia el tiempo, la baraja continua
+  game.round++;
+  game.turn = 0;
+  game.limitMs = settings.t0 * 1000;
+  game.lastFace = 0;
+  show('vPlay');
+  $('bSimPass').hidden = !game.sim;
+  speak(`Quedan ${game.playersLeft}. Preparados.`);
+  setTimeout(nextTurn, 1800);
 }
 
 function pickFace() {
@@ -400,44 +559,58 @@ function nextTurn() {
   if (!game) return;
   game.turn++;
   const face = pickFace();
-  const challenge = settings.challenges[Math.floor(Math.random() * settings.challenges.length)];
+  const challenge = drawChallenge();
   const f = settings.faces[face - 1];
   game.lastFace = face;
   game.face = face;
+  game.challenge = challenge;
   game.waiting = true;
   game.turnStart = performance.now();
 
-  $('faceCard').textContent = `${f.name.toUpperCase()} ARRIBA`;
-  $('faceCard').style.background = f.color;
+  // Temporizador oculto: duracion aleatoria entre 60 % y 140 % del limite actual
+  game.turnLimitMs = settings.hidden ? game.limitMs * (0.6 + Math.random() * 0.8) : game.limitMs;
+
+  $('cardTarget').style.background = f.color;
+  $('targetVal').textContent = f.name.toUpperCase();
   $('challenge').textContent = challenge;
   $('turnNo').textContent = game.turn;
-  $('limit').textContent = (game.limitMs / 1000).toFixed(1);
+  $('limit').textContent = settings.hidden ? '?' : (game.limitMs / 1000).toFixed(1);
+  $('playersStat').textContent = game.mode === 'eliminacion' ? `Quedan ${game.playersLeft}` : `Record ${getRecord()}`;
   $('holdBar').style.width = '0%';
+  $('timeBarWrap').style.visibility = settings.hidden ? 'hidden' : 'visible';
+  $('timer').textContent = settings.hidden ? '??' : (game.limitMs / 1000).toFixed(1);
+  $('timer').classList.remove('urgent');
+  document.body.classList.remove('urgent');
+  renderCube();
 
   speak(`Cara ${f.name} arriba, ${challenge}`);
   if (!game.sim) sendTarget(face);
 
   clearInterval(game.tickTimer);
   game.tickTimer = setInterval(tick, 50);
-  scheduleBeep();
+  if (!settings.hidden) scheduleBeep();
 }
 
 function tick() {
   if (!game || !game.waiting) return;
   const elapsed = performance.now() - game.turnStart;
-  const remaining = Math.max(0, game.limitMs - elapsed);
-  $('timer').textContent = (remaining / 1000).toFixed(1);
-  $('timer').classList.toggle('urgent', remaining < game.limitMs * 0.3);
-  $('timeBar').style.width = `${(remaining / game.limitMs) * 100}%`;
+  const remaining = Math.max(0, game.turnLimitMs - elapsed);
+  if (!settings.hidden) {
+    const urgent = remaining < game.turnLimitMs * 0.3;
+    $('timer').textContent = (remaining / 1000).toFixed(1);
+    $('timer').classList.toggle('urgent', urgent);
+    document.body.classList.toggle('urgent', urgent);
+    $('timeBar').style.width = `${(remaining / game.turnLimitMs) * 100}%`;
+  }
   if (remaining <= 0) onTimeout();
 }
 
 function scheduleBeep() {
   if (!game || !game.waiting) return;
   const elapsed = performance.now() - game.turnStart;
-  const frac = Math.max(0, 1 - elapsed / game.limitMs);   // 1 al inicio, 0 al final
+  const frac = Math.max(0, 1 - elapsed / game.turnLimitMs);
   sfxTick(1 - frac);
-  const interval = 90 + 760 * frac * frac;                 // se acelera con curva cuadratica
+  const interval = 90 + 760 * frac * frac;
   game.beepTimer = setTimeout(scheduleBeep, interval);
 }
 
@@ -445,6 +618,7 @@ function stopTurnTimers() {
   if (!game) return;
   clearInterval(game.tickTimer);
   clearTimeout(game.beepTimer);
+  document.body.classList.remove('urgent');
 }
 
 function onPass() {
@@ -452,9 +626,12 @@ function onPass() {
   game.waiting = false;
   stopTurnTimers();
   sfxSuccess();
+  flash('flash-ok', 500);
   speak('¡Pasalo!', 1.2);
   $('timeBar').style.width = '100%';
   $('holdBar').style.width = '100%';
+  $('hint').textContent = '';
+  if (game.mode === 'libre' && game.turn > getRecord()) setRecord(game.turn);
   game.limitMs = Math.max(settings.tMin * 1000, game.limitMs * settings.factor);
   setTimeout(nextTurn, 1400);
 }
@@ -465,16 +642,42 @@ function onTimeout() {
   stopTurnTimers();
   if (!game.sim) sendClear();
   sfxBoom();
-  speak('¡Boom! Se acabo el tiempo.', 1.0);
-  $('overTurn').textContent = game.turn;
-  const f = settings.faces[game.face - 1];
-  $('overDetail').textContent = `Faltaba: cara ${f.name} arriba, ${$('challenge').textContent}.`;
+  flash('flash-bad', 900);
   $('bSimPass').hidden = true;
-  show('vOver');
-  const wasSim = game.sim;
-  game = null;
+  $('hint').textContent = '';
+
+  const faltaba = `Faltaba: cara ${faceLabel(game.face)} arriba, ${game.challenge}.`;
+
+  if (game.mode === 'eliminacion') {
+    game.playersLeft--;
+    if (game.playersLeft <= 1) {
+      speak('¡Boom! Fuera. Queda uno. ¡Tenemos ganador!', 1.0);
+      setTimeout(sfxWin, 1600);
+      $('overTitle').textContent = 'GANADOR';
+      $('overBody').innerHTML = `Quien no tiene el cubo gana la partida.<br><span class="muted">${game.round} rondas, ${faltaba}</span>`;
+      $('bNext').textContent = 'Nueva partida';
+      $('bNext').onclick = startGame;
+      game = null;
+    } else {
+      speak(`¡Boom! Quien tiene el cubo queda fuera. Quedan ${game.playersLeft}.`, 1.0);
+      $('overTitle').textContent = 'ELIMINADO';
+      $('overBody').innerHTML = `Quien tiene el cubo sale de la partida.<br>Quedan <b>${game.playersLeft}</b> jugadores.<br><span class="muted">${faltaba}</span>`;
+      $('bNext').textContent = 'Siguiente ronda';
+      $('bNext').onclick = startRound;
+    }
+  } else {
+    const rec = getRecord();
+    const isRecord = game.turn - 1 >= rec && game.turn - 1 > 0;
+    speak('¡Boom! Se acabo el tiempo.', 1.0);
+    $('overTitle').textContent = 'BOOM';
+    $('overBody').innerHTML = `Ronda terminada en el turno <b>${game.turn}</b>.<br>
+      ${isRecord ? '<b>Nuevo record del grupo.</b>' : `Record del grupo: ${rec} turnos.`}<br><span class="muted">${faltaba}</span>`;
+    $('bNext').textContent = 'Otra ronda';
+    $('bNext').onclick = startGame;
+    game = null;
+  }
   setBadge();
-  if (wasSim) $('bSimPass').hidden = false;
+  show('vOver');
 }
 
 function abortGame() {
@@ -540,17 +743,17 @@ $('bStart').onclick = startGame;
 $('bSettings').onclick = () => { renderSettings(); show('vSettings'); };
 $('bCal').onclick = () => { renderCalTargets(); renderCube(); show('vCal'); };
 $('bSaveSettings').onclick = () => { readSettingsForm(); sendHold(); show('vHome'); };
-$('bResetSettings').onclick = () => { settings = structuredClone(DEFAULTS); saveSettings(); renderSettings(); };
+$('bResetSettings').onclick = () => { settings = JSON.parse(JSON.stringify(DEFAULTS)); saveSettings(); renderSettings(); };
 $('bBackSettings').onclick = () => show('vHome');
 $('bBackCal').onclick = () => { sendClear(); show('vHome'); };
 $('bAbort').onclick = abortGame;
 $('bSimPass').onclick = () => { if (game && game.sim) onPass(); };
-$('bAgain').onclick = startGame;
-$('bHome').onclick = () => show('vHome');
+$('bHome').onclick = () => { game = null; setBadge(); show('vHome'); };
 document.addEventListener('keydown', (e) => { if (e.key === 'p' && game && game.sim) onPass(); });
 
 setBadge();
 renderCube();
+renderHomeSummary();
 </script>
 </body>
 </html>
