@@ -383,7 +383,7 @@ const DEFAULTS = {
 // ============================== Estado ==============================
 let settings = loadSettings();
 let ble = { device: null, cmd: null, connected: false };
-let cube = { face: 0, stable: 0, progress: 0, target: 0 };
+let cube = { face: 0, stable: 0, fault: false, progress: 0, target: 0 };
 let game = null;
 let audio = null;
 let wakeLock = null;
@@ -564,7 +564,7 @@ async function connect() {
 }
 function onDisconnected() {
   ble.connected = false; ble.cmd = null;
-  cube = { face: 0, stable: 0, progress: 0, target: 0 };
+  cube = { face: 0, stable: 0, fault: false, progress: 0, target: 0 };
   setBadge(); renderCube();
   calLog('Cubo desconectado');
   if (game && !game.sim) { game.sim = true; $('bSimPass').hidden = false; speak('Cubo desconectado. Modo simulacion.'); }
@@ -588,7 +588,10 @@ function sendHold() {
 function onStatus(ev) {
   const d = ev.target.value;
   if (d.byteLength < 5) return;
-  cube = { face: d.getUint8(0), stable: d.getUint8(1), progress: d.getUint8(2), target: d.getUint8(4) };
+  const flags = d.getUint8(1);
+  const fault = (flags & 0x02) !== 0;
+  if (fault && !cube.fault) calLog('El cubo no detecta su sensor: revisa el cableado del IMU');
+  cube = { face: d.getUint8(0), stable: flags & 0x01, fault, progress: d.getUint8(2), target: d.getUint8(4) };
   const event = d.getUint8(3);
   renderCube();
   if (event === EVT_PASS) {
@@ -601,7 +604,7 @@ function faceLabel(f) { return f ? settings.faces[f - 1].name : '-'; }
 
 function renderCube() {
   const fname = (f) => f ? `${f} ${faceLabel(f)}` : '-';
-  $('cFace').textContent = fname(cube.face);
+  $('cFace').textContent = cube.fault ? 'SIN SENSOR' : fname(cube.face);
   $('cStable').textContent = cube.stable ? 'si' : 'no';
   $('cTarget').textContent = fname(cube.target);
   $('cProg').textContent = `${cube.progress}%`;
@@ -616,7 +619,7 @@ function renderCube() {
   } else {
     card.className = 'card none';
     card.style.background = '';
-    $('liveVal').textContent = game && game.sim ? 'SIM' : '?';
+    $('liveVal').textContent = cube.fault ? 'SIN SENSOR' : (game && game.sim ? 'SIM' : '?');
   }
   // Pista de cara opuesta
   if (game && game.waiting && settings.hint && cube.face && OPPOSITE[cube.face] === game.face) {
