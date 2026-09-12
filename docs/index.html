@@ -95,8 +95,6 @@
   .who .name { font-size: 44px; font-weight: 800; line-height: 1.1; }
   .who.transit { background: #2a2415; }
   .who.transit .name { color: var(--accent); }
-  .choice { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .choice button { font-size: 24px; font-weight: 700; padding: 22px 10px; }
   .board { width: 100%; border-collapse: collapse; font-size: 18px; }
   .board td { padding: 6px 4px; border-bottom: 1px solid var(--line); }
   .board td:last-child { text-align: right; letter-spacing: 2px; }
@@ -124,7 +122,7 @@
     <button id="bConnect" class="primary">Conectar cubo</button>
     <div class="modes" id="modes"></div>
     <div class="panel">
-      <h3>Jugadores <span class="muted" style="font-weight:400">(para Al azar y Victima)</span></h3>
+      <h3>Jugadores <span class="muted" style="font-weight:400">(para Al azar)</span></h3>
       <div class="chips" id="chips"></div>
       <div class="addrow">
         <input id="newName" type="text" maxlength="14" placeholder="Nombre" autocomplete="off">
@@ -145,10 +143,6 @@
   <!-- JUEGO -->
   <section id="vPlay" hidden>
     <div id="who" class="who" hidden><div class="lbl">LE TOCA A</div><div class="name" id="whoName">-</div></div>
-    <div id="choiceWrap" hidden>
-      <div class="muted" style="text-align:center;margin-bottom:8px">Elige a quien le pasas el cubo</div>
-      <div class="choice" id="choice"></div>
-    </div>
     <div id="turnUI">
     <div class="cards">
       <div id="cardTarget" class="card"><div class="lbl">BUSCA</div><div class="val" id="targetVal">-</div></div>
@@ -183,7 +177,9 @@
     <div class="panel">
       <h3>Variantes (aplican a todos los modos)</h3>
       <label>Jugadores en Eliminacion<input id="sPlayers" type="number" min="2" max="12" step="1"></label>
-      <label>Vidas por jugador en Al azar y Victima<input id="sLives" type="number" min="1" max="5" step="1"></label>
+      <label>Vidas por jugador en Al azar<input id="sLives" type="number" min="1" max="5" step="1"></label>
+      <label>Mecha de Equilibrio, minimo (s)<input id="sFuseMin" type="number" min="15" max="180" step="5"></label>
+      <label>Mecha de Equilibrio, maximo (s)<input id="sFuseMax" type="number" min="20" max="300" step="5"></label>
       <label class="check"><input id="sHidden" type="checkbox"> Temporizador oculto: sin pitidos ni cuenta atras, explota cuando quiere</label>
       <label class="check"><input id="sHint" type="checkbox"> Pista de cara opuesta: avisa cuando la cara buscada es la opuesta a la actual</label>
     </div>
@@ -199,6 +195,16 @@
       <div id="packsEdit"></div>
       <label>Retos propios, uno por linea<textarea id="sCustom" placeholder="con el sombrero de Juan puesto&#10;mientras imitas a un gato"></textarea></label>
       <div class="muted">Los retos no se repiten dentro de una partida hasta agotar la baraja.</div>
+    </div>
+    <div class="panel">
+      <h3>Lugares de Equilibrio</h3>
+      <div id="placePacksEdit"></div>
+    </div>
+    <div class="panel">
+      <h3>Prendas al explotar (Equilibrio)</h3>
+      <div id="penancePacksEdit"></div>
+      <label>Prendas propias, una por linea<textarea id="sPenances" placeholder="cantar el estribillo de una cancion que elija el grupo&#10;hablar con acento hasta tu proximo turno"></textarea></label>
+      <div class="muted">El juego no propone bebidas. Si el grupo quiere, las escribe aqui.</div>
     </div>
     <div class="panel">
       <h3>Caras del cubo</h3>
@@ -254,14 +260,16 @@
         <li>Gana el ultimo con vidas. El marcador se ve entre rondas.</li>
       </ul>
 
-      <h2>Victima</h2>
-      <p class="req">Con nombres y vidas, como Al azar.</p>
+      <h2>Equilibrio</h2>
+      <p class="req">Sin nombres. De 3 a 6 jugadores, sentados. Necesita el firmware 2 del cubo; la web avisa si no lo tiene.</p>
       <ul>
-        <li>Tras el PASS, quien se ha salvado <b>elige a quien le pasa el cubo</b> tocando su nombre en el movil.</li>
-        <li>No puede elegir a quien se lo acaba de dar. Nada de devoluciones.</li>
-        <li>Al tocar el nombre, el movil lo dice, el cubo viaja y dos segundos despues llega la orden.</li>
-        <li>Tras un BOOM, el siguiente lo decide el azar. Explotar no da derecho a elegir.</li>
-        <li>Cada BOOM quita una vida. Gana el ultimo con vidas.</li>
+        <li>El cubo va en circulo. La orden es un <b>lugar del cuerpo</b> y un <b>tiempo</b>: "en el dorso de la mano, tres segundos". A veces tambien una cara: "azul arriba, sobre la cabeza, cuatro segundos".</li>
+        <li>Coloca el cubo donde se pide y <b>no lo sujetes</b>. El grupo vigila eso. El cubo vigila lo demas: si se inclina o se mueve, la barra verde vuelve a cero y empiezas a contar otra vez.</li>
+        <li>Cuando la barra verde se llena, PASS. Pasa el cubo al siguiente.</li>
+        <li><b>La mecha es compartida</b>: un unico tiempo para toda la ronda, oculto, que no se reinicia al pasar. Cada segundo que tardas en pasar lo quemas tu. Los pitidos se aceleran cuando queda poco.</li>
+        <li>Cuando explota, quien tiene el cubo <b>cumple una prenda</b> que dicta el movil. Despues, nueva ronda con mecha nueva.</li>
+        <li>Con cada pase los lugares se ponen mas dificiles: palma, rodilla, dorso de la mano, antebrazo, hombro, cabeza, dos dedos.</li>
+        <li>Si el cubo se cae, lo recoges y sigues. El tiempo no se para.</li>
       </ul>
 
       <h2>Variantes</h2>
@@ -277,6 +285,7 @@
         <li><b>Se me ha caido el cubo o lo he soltado antes del PASS.</b> Lo recoges y sigues. El tiempo no se para.</li>
         <li><b>He dado el PASS sin hacer el reto.</b> El grupo decide: lo normal es que quien pasa el cubo lo haga con el reto ya cumplido. Si no, el grupo se lo devuelve y pierde tiempo del siguiente turno de todos. Con eso basta.</li>
         <li><b>El cubo no detecta la cara.</b> Muevelo mas despacio y apoyalo plano. Si esta inclinado sobre una arista, no cuenta.</li>
+        <li><b>En Equilibrio, ¿puedo tocar el cubo mientras cuenta?</b> No. Colocarlo si, sujetarlo no. Si se te cae, lo vuelves a poner y el contador empieza de cero.</li>
         <li><b>Hay discusion sobre quien tenia el cubo al explotar.</b> Lo tenia quien lo tocaba. Si lo tocaban dos, la explosion es de quien lo recibia.</li>
       </ul>
     </div>
@@ -302,11 +311,13 @@
 'use strict';
 
 // ============================== Constantes ==============================
-const VERSION = 'PoC 0.4';
+const VERSION = 'PoC 0.5';
 const SERVICE_UUID = 'a5c0f000-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const STATUS_UUID  = 'a5c0f001-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const COMMAND_UUID = 'a5c0f002-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const CMD = { SET_TARGET: 0x01, CLEAR: 0x02, SET_HOLD: 0x03 };
+const FACE_ANY = 7;           // objetivo "cualquier cara" (firmware 2)
+const PROTOCOL_MIN_EQ = 2;    // version minima de firmware para Equilibrio
 const EVT_PASS = 0x01;
 const OPPOSITE = { 1: 2, 2: 1, 3: 4, 4: 3, 5: 6, 6: 5 };
 const TRANSIT_MS = 2200;   // desde que se dice el nombre hasta que se dicta la orden
@@ -315,7 +326,71 @@ const MODES = {
   clasico:     { name: 'Clasico',     names: false, desc: 'El cubo va en circulo. Cada BOOM termina la ronda. Se guarda el record de turnos.' },
   eliminacion: { name: 'Eliminacion', names: false, desc: 'Quien tiene el cubo al explotar queda fuera. Gana quien queda. Sin nombres, solo un conteo.' },
   azar:        { name: 'Al azar',     names: true,  desc: 'La app dice un nombre, el cubo viaja hasta esa persona y entonces llega la orden. Vidas por jugador.' },
-  victima:     { name: 'Victima',     names: true,  desc: 'Quien se salva elige a quien le pasa el cubo. No se puede devolver a quien te lo dio. Vidas por jugador.' },
+  equilibrio:  { name: 'Equilibrio',  names: false, desc: 'Coloca el cubo en la cabeza, el dorso de la mano, el antebrazo... y aguanta quieto. Mecha compartida: el tiempo no se reinicia al pasar. Quien explota, prenda.' },
+};
+
+// Lugares de Equilibrio. tier 1 facil .. 4 dificil. hold en segundos. tol: 85 normal, 90 estricto, 95 muy estricto.
+// face: true exige ademas una cara concreta.
+const PLACES = {
+  sentado: {
+    name: 'Sentado', desc: 'Se juega sin levantarse. Es el mazo base.',
+    items: [
+      { t: 'en la palma de la mano', tier: 1, hold: 2, tol: 85 },
+      { t: 'sobre la rodilla', tier: 1, hold: 2, tol: 85 },
+      { t: 'en la palma, con el brazo estirado', tier: 1, hold: 3, tol: 88 },
+      { t: 'sobre el muslo, sin manos', tier: 1, hold: 3, tol: 85 },
+      { t: 'en el dorso de la mano', tier: 2, hold: 3, tol: 90 },
+      { t: 'sobre el antebrazo', tier: 2, hold: 3, tol: 88 },
+      { t: 'en el hombro', tier: 2, hold: 3, tol: 85 },
+      { t: 'sobre la cabeza', tier: 2, hold: 3, tol: 85 },
+      { t: 'en el dorso de la mano, brazo estirado', tier: 2, hold: 3, tol: 92 },
+      { t: 'en el dorso de la mano', tier: 2, hold: 4, tol: 90, face: true },
+      { t: 'sobre dos dedos', tier: 3, hold: 3, tol: 90 },
+      { t: 'en el dorso de la mano, con los ojos cerrados', tier: 3, hold: 4, tol: 90 },
+      { t: 'sobre la cabeza, mientras aplaudes', tier: 3, hold: 3, tol: 85 },
+      { t: 'en el antebrazo, mirando al techo', tier: 3, hold: 4, tol: 90 },
+      { t: 'sobre la cabeza', tier: 3, hold: 4, tol: 88, face: true },
+      { t: 'en el codo, con el brazo doblado', tier: 3, hold: 3, tol: 88 },
+      { t: 'en la punta de los dedos', tier: 4, hold: 3, tol: 95 },
+      { t: 'sobre la cabeza, con los ojos cerrados', tier: 4, hold: 5, tol: 88 },
+      { t: 'en el dorso de la mano, brazo estirado', tier: 4, hold: 5, tol: 94, face: true },
+      { t: 'sobre el pie, sentado', tier: 4, hold: 4, tol: 88 },
+      { t: 'en el hombro, girando la cabeza a los lados', tier: 4, hold: 4, tol: 88 },
+    ],
+  },
+  mesa: {
+    name: 'Mesa y de pie', desc: 'Recorridos y levantarse. Cuidado con los vasos.',
+    items: [
+      { t: 'llevalo de una punta de la mesa a la otra en el dorso de la mano', tier: 2, hold: 6, tol: 92 },
+      { t: 'muevelo ocho dedos a la izquierda sin que se incline', tier: 2, hold: 4, tol: 95 },
+      { t: 'en la palma, levantate y vuelve a sentarte', tier: 2, hold: 5, tol: 88 },
+      { t: 'da una vuelta a tu silla con el cubo en la palma', tier: 3, hold: 6, tol: 90 },
+      { t: 'sobre la cabeza, de pie, dos pasos y vuelve', tier: 3, hold: 5, tol: 88 },
+      { t: 'en el dorso de la mano, cambia de silla con quien tengas enfrente', tier: 3, hold: 6, tol: 90 },
+      { t: 'en el antebrazo, ve a tocar la pared y vuelve', tier: 4, hold: 8, tol: 90 },
+      { t: 'llevalo de una punta de la mesa a la otra en la punta de los dedos', tier: 4, hold: 6, tol: 95 },
+    ],
+  },
+};
+
+const PENANCES = {
+  fisicas: {
+    name: 'Fisicas', desc: 'Cuerpo, sin material.',
+    items: [
+      'cinco sentadillas', 'diez segundos de plancha', 'cuatro abdominales', 'bailar diez segundos sin musica',
+      'imitar un animal que elija el grupo', 'diez saltos en el sitio', 'aguantar a la pata coja hasta el proximo BOOM',
+      'dar una vuelta a la mesa andando como un cangrejo', 'mantener los brazos en cruz durante el proximo turno',
+    ],
+  },
+  sociales: {
+    name: 'Sociales', desc: 'Hablar, cantar, humillarse un poco.',
+    items: [
+      'contar una anecdota vergonzosa', 'cantar el estribillo de una cancion que elija el grupo',
+      'hablar con acento hasta tu proximo turno', 'decir algo bonito a cada jugador', 'cambiar de sitio con quien elija el grupo',
+      'imitar a otro jugador hasta que el grupo adivine quien es', 'proponer un brindis absurdo', 'contar un chiste malo',
+      'hacer de narrador deportivo durante el proximo turno',
+    ],
+  },
 };
 
 // Packs de retos. Todos se pueden hacer sentado o de pie junto a una mesa.
@@ -367,6 +442,7 @@ const PACKS = {
 
 const DEFAULTS = {
   mode: 'clasico', players: 4, lives: 3, names: [], hidden: false, hint: false,
+  fuseMin: 40, fuseMax: 80, placePacks: ['sentado'], penancePacks: ['fisicas', 'sociales'], customPenances: [],
   t0: 15, tMin: 4, factor: 0.9, holdS: 2.0,
   packs: ['bar'],
   custom: [],
@@ -382,7 +458,7 @@ const DEFAULTS = {
 
 // ============================== Estado ==============================
 let settings = loadSettings();
-let ble = { device: null, cmd: null, connected: false };
+let ble = { device: null, cmd: null, connected: false, oldFirmware: false, version: 0 };
 let cube = { face: 0, stable: 0, fault: false, progress: 0, target: 0 };
 let game = null;
 let audio = null;
@@ -399,6 +475,7 @@ function loadSettings() {
     const s = JSON.parse(raw);
     delete s.challenges; // formato de la version 0.1
     if (s.mode === 'libre') s.mode = 'clasico'; // version 0.2
+    if (s.mode === 'victima') s.mode = 'clasico'; // version 0.5: Victima eliminado
     return Object.assign(base, s);
   } catch { return base; }
 }
@@ -409,6 +486,11 @@ function setRecord(n) { localStorage.setItem('gravifail.record', String(n)); }
 function renderSettings() {
   $('sPlayers').value = settings.players;
   $('sLives').value = settings.lives;
+  $('sFuseMin').value = settings.fuseMin;
+  $('sFuseMax').value = settings.fuseMax;
+  $('sPenances').value = settings.customPenances.join('\n');
+  renderPackChecks('placePacksEdit', PLACES, settings.placePacks, 'place');
+  renderPackChecks('penancePacksEdit', PENANCES, settings.penancePacks, 'penance');
   $('sHidden').checked = settings.hidden;
   $('sHint').checked = settings.hint;
   $('sT0').value = settings.t0;
@@ -438,6 +520,11 @@ function renderSettings() {
 function readSettingsForm() {
   settings.players = clamp(parseInt($('sPlayers').value, 10) || DEFAULTS.players, 2, 12);
   settings.lives = clamp(parseInt($('sLives').value, 10) || DEFAULTS.lives, 1, 5);
+  settings.fuseMin = clamp(parseInt($('sFuseMin').value, 10) || DEFAULTS.fuseMin, 15, 180);
+  settings.fuseMax = clamp(parseInt($('sFuseMax').value, 10) || DEFAULTS.fuseMax, settings.fuseMin + 5, 300);
+  settings.customPenances = $('sPenances').value.split('\n').map(x => x.trim()).filter(Boolean);
+  settings.placePacks = Array.from($('placePacksEdit').querySelectorAll('input:checked')).map(i => i.dataset.pack);
+  settings.penancePacks = Array.from($('penancePacksEdit').querySelectorAll('input:checked')).map(i => i.dataset.pack);
   settings.hidden = $('sHidden').checked;
   settings.hint = $('sHint').checked;
   settings.t0 = clamp(parseFloat($('sT0').value) || DEFAULTS.t0, 3, 60);
@@ -452,6 +539,19 @@ function readSettingsForm() {
   });
   saveSettings();
 }
+function renderPackChecks(elId, packs, selected, kind) {
+  const wrap = $(elId);
+  wrap.innerHTML = '';
+  Object.keys(packs).forEach(key => {
+    const p = packs[key];
+    const l = document.createElement('label');
+    l.className = 'check';
+    l.innerHTML = `<input type="checkbox" data-pack="${key}" data-kind="${kind}" ${selected.includes(key) ? 'checked' : ''}>
+                   <span><b>${p.name}</b> (${p.items.length}) <span class="muted">${p.desc}</span></span>`;
+    wrap.appendChild(l);
+  });
+}
+
 function renderHomeSummary() {
   const packs = settings.packs.map(k => PACKS[k] ? PACKS[k].name : k);
   if (settings.custom.length) packs.push(`${settings.custom.length} propios`);
@@ -459,6 +559,7 @@ function renderHomeSummary() {
   let mode = m.name;
   if (settings.mode === 'eliminacion') mode += `, ${settings.players} jugadores`;
   if (m.names) mode += `, ${settings.names.length} jugadores, ${settings.lives} vidas`;
+  if (settings.mode === 'equilibrio') mode += `, mecha ${settings.fuseMin} a ${settings.fuseMax} s`;
   const extras = [settings.hidden ? 'temporizador oculto' : '', settings.hint ? 'pista de opuesta' : ''].filter(Boolean).join(', ');
   $('homeSummary').innerHTML = `<b>${mode}</b>${extras ? ', ' + extras : ''}<br>
     Retos: ${packs.join(', ') || 'ninguno'}<br>
@@ -482,7 +583,7 @@ function renderModes() {
 function renderChips() {
   const wrap = $('chips');
   wrap.innerHTML = '';
-  if (!settings.names.length) wrap.innerHTML = '<span class="muted">Sin jugadores. Añade al menos dos para Al azar o Victima.</span>';
+  if (!settings.names.length) wrap.innerHTML = '<span class="muted">Sin jugadores. Añade al menos dos para Al azar.</span>';
   settings.names.forEach((n, i) => {
     const c = document.createElement('span');
     c.className = 'chip';
@@ -502,8 +603,11 @@ function addName() {
 }
 function updateStartButton() {
   const needNames = MODES[settings.mode].names && settings.names.length < 2;
-  $('bStart').disabled = needNames;
-  $('bStart').textContent = needNames ? 'Añade al menos dos jugadores' : 'Empezar partida';
+  const oldFw = settings.mode === 'equilibrio' && ble.connected && ble.oldFirmware;
+  $('bStart').disabled = needNames || oldFw;
+  if (needNames) $('bStart').textContent = 'Añade al menos dos jugadores';
+  else if (oldFw) $('bStart').textContent = 'Equilibrio necesita el firmware 2 del cubo';
+  else $('bStart').textContent = 'Empezar partida';
 }
 
 // ============================== Baraja de retos ==============================
@@ -554,7 +658,7 @@ async function connect() {
     const cmd = await service.getCharacteristic(COMMAND_UUID);
     await status.startNotifications();
     status.addEventListener('characteristicvaluechanged', onStatus);
-    ble = { device, cmd, connected: true };
+    ble = { device, cmd, connected: true, oldFirmware: false, version: 0 };
     setBadge();
     await sendHold();
     calLog(`Conectado a ${device.name || 'cubo'}`);
@@ -563,9 +667,9 @@ async function connect() {
   }
 }
 function onDisconnected() {
-  ble.connected = false; ble.cmd = null;
+  ble.connected = false; ble.cmd = null; ble.oldFirmware = false; ble.version = 0;
   cube = { face: 0, stable: 0, fault: false, progress: 0, target: 0 };
-  setBadge(); renderCube();
+  setBadge(); renderCube(); updateStartButton();
   calLog('Cubo desconectado');
   if (game && !game.sim) { game.sim = true; $('bSimPass').hidden = false; speak('Cubo desconectado. Modo simulacion.'); }
 }
@@ -578,7 +682,16 @@ async function sendCmd(bytes) {
     return true;
   } catch (e) { calLog(`Error escribiendo: ${e.message}`); return false; }
 }
-const sendTarget = (face) => sendCmd([CMD.SET_TARGET, face]);
+// face 1..6 o FACE_ANY. holdMs y tolPct opcionales (firmware 2); si se omiten, el cubo usa sus valores por defecto
+function sendTarget(face, holdMs, tolPct) {
+  const bytes = [CMD.SET_TARGET, face];
+  if (holdMs !== undefined) {
+    const ms = Math.round(holdMs);
+    bytes.push(ms & 0xff, (ms >> 8) & 0xff);
+    if (tolPct !== undefined) bytes.push(clamp(Math.round(tolPct), 50, 99));
+  }
+  return sendCmd(bytes);
+}
 const sendClear  = () => sendCmd([CMD.CLEAR]);
 function sendHold() {
   const ms = Math.round(settings.holdS * 1000);
@@ -588,6 +701,12 @@ function sendHold() {
 function onStatus(ev) {
   const d = ev.target.value;
   if (d.byteLength < 5) return;
+  const v = d.byteLength >= 6 ? d.getUint8(5) : 1;
+  if (v !== ble.version) {
+    ble.version = v; ble.oldFirmware = v < PROTOCOL_MIN_EQ;
+    calLog(`Firmware del cubo: protocolo ${v}${ble.oldFirmware ? ' (antiguo, sin Equilibrio)' : ''}`);
+    updateStartButton();
+  }
   const flags = d.getUint8(1);
   const fault = (flags & 0x02) !== 0;
   if (fault && !cube.fault) calLog('El cubo no detecta su sensor: revisa el cableado del IMU');
@@ -600,7 +719,10 @@ function onStatus(ev) {
   }
 }
 
-function faceLabel(f) { return f ? settings.faces[f - 1].name : '-'; }
+function faceLabel(f) {
+  if (f === FACE_ANY) return 'Cualquiera';
+  return (f >= 1 && f <= 6) ? settings.faces[f - 1].name : '-';
+}
 
 function renderCube() {
   const fname = (f) => f ? `${f} ${faceLabel(f)}` : '-';
@@ -612,7 +734,7 @@ function renderCube() {
 
   // Tarjeta AHORA
   const card = $('cardLive');
-  if (cube.face) {
+  if (cube.face >= 1 && cube.face <= 6) {
     card.className = 'card';
     card.style.background = settings.faces[cube.face - 1].color;
     $('liveVal').textContent = faceLabel(cube.face).toUpperCase();
@@ -705,6 +827,8 @@ function startGame() {
     bag: [],
     current: -1,   // indice del jugador que tiene el cubo
     prev: -1,      // quien se lo paso
+    // Equilibrio
+    fuseMs: 0, fuseStart: 0, passes: 0, level: 1, placeDeck: [], lastPlace: '', order: null,
     round: 1,
     turn: 0,
     limitMs: settings.t0 * 1000,
@@ -721,12 +845,12 @@ function startGame() {
   show('vPlay');
   renderCube();
   $('who').hidden = !named;
-  $('choiceWrap').hidden = true;
   $('turnUI').hidden = false;
+  sendHold();   // que ningun modo herede el mantenimiento de otro
   let intro;
   if (game.mode === 'eliminacion') intro = `${game.playersLeft} jugadores. Quien explote, fuera.`;
   else if (game.mode === 'azar') intro = `${game.players.length} jugadores, ${settings.lives} vidas. Atentos al nombre.`;
-  else if (game.mode === 'victima') intro = `${game.players.length} jugadores, ${settings.lives} vidas. Quien se salva elige.`;
+  else if (game.mode === 'equilibrio') { armFuse(); intro = 'Equilibrio. Coloca el cubo donde diga y no lo sujetes. La mecha es de todos.'; }
   else intro = 'Modo clasico.';
   speak(`${game.sim ? 'Modo simulacion. ' : ''}${intro} Preparados.`);
   setTimeout(beginTurn, 2400);
@@ -743,7 +867,6 @@ function beginTurn(chosenIdx) {
   const p = game.players[idx];
   $('who').className = 'who transit';
   $('whoName').textContent = p.name;
-  $('choiceWrap').hidden = true;
   $('turnUI').hidden = false;
   $('challenge').textContent = 'el cubo viaja...';
   $('targetVal').textContent = '-';
@@ -765,23 +888,85 @@ function drawFromBag() {
   return game.bag.pop();
 }
 
-// Modo victima: quien acaba de pasar elige al siguiente
-function showChoice() {
-  const wrap = $('choice');
-  wrap.innerHTML = '';
-  const alive = game.players.map((p, i) => p.lives > 0 ? i : -1).filter(i => i >= 0);
-  let options = alive.filter(i => i !== game.current && i !== game.prev);
-  if (!options.length) options = alive.filter(i => i !== game.current);
-  options.forEach(i => {
-    const b = document.createElement('button');
-    b.textContent = game.players[i].name;
-    b.onclick = () => { if (game) beginTurn(i); };
-    wrap.appendChild(b);
-  });
-  $('turnUI').hidden = true;
-  $('choiceWrap').hidden = false;
-  $('who').className = 'who';
-  $('whoName').textContent = `${game.players[game.current].name} elige`;
+// ============================== Equilibrio ==============================
+function armFuse() {
+  const lo = settings.fuseMin * 1000, hi = settings.fuseMax * 1000;
+  game.fuseMs = lo + Math.random() * (hi - lo);
+  game.fuseStart = 0;   // arranca con la primera orden
+}
+function buildPlaceDeck() {
+  let items = [];
+  settings.placePacks.forEach(k => { if (PLACES[k]) items = items.concat(PLACES[k].items); });
+  if (!items.length) items = PLACES.sentado.items.slice();
+  return items;
+}
+function drawPlace() {
+  if (!game.placeDeck.length) game.placeDeck = buildPlaceDeck();
+  const lvl = game.level;
+  let pool = game.placeDeck.filter(o => o.tier <= lvl && o.t !== game.lastPlace);
+  const top = pool.filter(o => o.tier === lvl);
+  if (top.length && Math.random() < 0.6) pool = top;
+  if (!pool.length) pool = game.placeDeck;
+  const o = pool[Math.floor(Math.random() * pool.length)];
+  game.lastPlace = o.t;
+  return o;
+}
+function drawPenance() {
+  let items = [];
+  settings.penancePacks.forEach(k => { if (PENANCES[k]) items = items.concat(PENANCES[k].items); });
+  items = items.concat(settings.customPenances);
+  if (!items.length) items = PENANCES.fisicas.items;
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function nextTurnEquilibrio() {
+  game.turn++;
+  const o = drawPlace();
+  const face = o.face ? pickFace() : FACE_ANY;
+  const f = o.face ? settings.faces[face - 1] : null;
+  game.order = o;
+  game.face = face;
+  game.lastFace = o.face ? face : game.lastFace;
+  game.challenge = (f ? `${f.name} arriba, ` : '') + `${o.t}, ${o.hold} s`;
+  game.waiting = true;
+  game.turnStart = performance.now();
+  if (!game.fuseStart) game.fuseStart = game.turnStart;
+
+  if (f) { $('cardTarget').className = 'card'; $('cardTarget').style.background = f.color; $('targetVal').textContent = f.name.toUpperCase(); }
+  else   { $('cardTarget').className = 'card none'; $('cardTarget').style.background = ''; $('targetVal').textContent = 'CUALQUIERA'; }
+  $('challenge').textContent = `${o.t} · ${o.hold} s`;
+  $('turnNo').textContent = game.turn;
+  $('limit').textContent = `nivel ${game.level}`;
+  $('playersStat').textContent = 'Mecha compartida';
+  $('holdBar').style.width = '0%';
+  $('timeBarWrap').style.visibility = 'hidden';
+  $('timer').textContent = 'MECHA';
+  $('timer').classList.remove('urgent');
+  document.body.classList.remove('urgent');
+  renderCube();
+
+  speak(`${f ? `Cara ${f.name} arriba, ` : ''}${o.t}, ${o.hold} segundos`);
+  if (!game.sim) sendTarget(face, o.hold * 1000, o.tol);
+
+  clearInterval(game.tickTimer);
+  game.tickTimer = setInterval(tickEquilibrio, 50);
+  scheduleBeepEquilibrio();
+}
+function tickEquilibrio() {
+  if (!game || !game.waiting) return;
+  const elapsed = performance.now() - game.fuseStart;
+  const frac = elapsed / game.fuseMs;
+  const urgent = frac > 0.75;
+  $('timer').classList.toggle('urgent', urgent);
+  document.body.classList.toggle('urgent', urgent);
+  if (elapsed >= game.fuseMs) onTimeout();
+}
+function scheduleBeepEquilibrio() {
+  if (!game || !game.waiting) return;
+  const frac = Math.min(1, (performance.now() - game.fuseStart) / game.fuseMs);
+  sfxTick(frac);
+  const rest = 1 - frac;
+  game.beepTimer = setTimeout(scheduleBeepEquilibrio, 120 + 1400 * rest * rest);
 }
 
 function renderBoard() {
@@ -804,9 +989,13 @@ function startRound() {
   game.lastFace = 0;
   show('vPlay');
   $('bSimPass').hidden = !game.sim;
-  if (namedMode()) {
+  if (game.mode === 'equilibrio') {
+    armFuse();
+    game.passes = 0; game.level = 1;
+    speak('Mecha nueva. Preparados.');
+    setTimeout(nextTurn, 1800);
+  } else if (namedMode()) {
     speak(`Quedan ${alivePlayers().length}. Preparados.`);
-    // En victima, tras un BOOM el siguiente lo decide el azar para no premiar al eliminado
     setTimeout(() => beginTurn(), 1800);
   } else {
     speak(`Quedan ${game.playersLeft}. Preparados.`);
@@ -823,6 +1012,7 @@ function pickFace() {
 
 function nextTurn() {
   if (!game) return;
+  if (game.mode === 'equilibrio') { nextTurnEquilibrio(); return; }
   game.turn++;
   const face = pickFace();
   const challenge = drawChallenge();
@@ -901,9 +1091,15 @@ function onPass() {
   $('holdBar').style.width = '100%';
   $('hint').textContent = '';
   if (game.mode === 'clasico' && game.turn > getRecord()) setRecord(game.turn);
+  if (game.mode === 'equilibrio') {
+    game.passes++;
+    game.level = Math.min(4, 1 + Math.floor(game.passes / 2));
+    // la mecha sigue corriendo: la pausa es corta a proposito
+    setTimeout(nextTurn, 900);
+    return;
+  }
   game.limitMs = Math.max(settings.tMin * 1000, game.limitMs * settings.factor);
-  if (game.mode === 'victima') setTimeout(() => { if (game) showChoice(); }, 900);
-  else if (game.mode === 'azar') setTimeout(() => beginTurn(), 900);
+  if (game.mode === 'azar') setTimeout(() => beginTurn(), 900);
   else setTimeout(nextTurn, 1400);
 }
 
@@ -917,10 +1113,18 @@ function onTimeout() {
   $('bSimPass').hidden = true;
   $('hint').textContent = '';
 
-  const faltaba = `Faltaba: cara ${faceLabel(game.face)} arriba, ${game.challenge}.`;
+  const faltaba = game.mode === 'equilibrio' ? `Faltaba: ${game.challenge}.` : `Faltaba: cara ${faceLabel(game.face)} arriba, ${game.challenge}.`;
   $('boardWrap').hidden = true;
 
-  if (namedMode()) {
+  if (game.mode === 'equilibrio') {
+    const pen = drawPenance();
+    speak(`¡Boom! Prenda: ${pen}.`, 1.0);
+    $('overTitle').textContent = 'BOOM';
+    $('overBody').innerHTML = `Quien tiene el cubo cumple la prenda:<br><b style="font-size:24px">${escapeHtml(pen)}</b><br>
+      <span class="muted">${game.passes} pases en esta ronda. ${faltaba}</span>`;
+    $('bNext').textContent = 'Siguiente ronda';
+    $('bNext').onclick = startRound;
+  } else if (namedMode()) {
     const p = game.players[game.current];
     p.lives--;
     const alive = alivePlayers();
