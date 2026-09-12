@@ -317,6 +317,10 @@ const STATUS_UUID  = 'a5c0f001-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const COMMAND_UUID = 'a5c0f002-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const CMD = { SET_TARGET: 0x01, CLEAR: 0x02, SET_HOLD: 0x03 };
 const FACE_ANY = 7;           // objetivo "cualquier cara" (firmware 2)
+// Equilibrio: probabilidad de que la orden exija ademas una cara concreta, por nivel 1..4.
+// Cuando cae, el mantenimiento sube un segundo. Ajustar tras el playtest.
+const FACE_CHANCE = { 1: 0.0, 2: 0.25, 3: 0.5, 4: 0.7 };
+const FACE_EXTRA_HOLD_S = 1;
 const PROTOCOL_MIN_EQ = 2;    // version minima de firmware para Equilibrio
 const EVT_PASS = 0x01;
 const OPPOSITE = { 1: 2, 2: 1, 3: 4, 4: 3, 5: 6, 6: 5 };
@@ -330,7 +334,7 @@ const MODES = {
 };
 
 // Lugares de Equilibrio. tier 1 facil .. 4 dificil. hold en segundos. tol: 85 normal, 90 estricto, 95 muy estricto.
-// face: true exige ademas una cara concreta.
+// La cara se añade como modificador aleatorio segun el nivel (FACE_CHANCE), no va fija en el lugar.
 const PLACES = {
   sentado: {
     name: 'Sentado', desc: 'Se juega sin levantarse. Es el mazo base.',
@@ -344,16 +348,14 @@ const PLACES = {
       { t: 'en el hombro', tier: 2, hold: 3, tol: 85 },
       { t: 'sobre la cabeza', tier: 2, hold: 3, tol: 85 },
       { t: 'en el dorso de la mano, brazo estirado', tier: 2, hold: 3, tol: 92 },
-      { t: 'en el dorso de la mano', tier: 2, hold: 4, tol: 90, face: true },
       { t: 'sobre dos dedos', tier: 3, hold: 3, tol: 90 },
       { t: 'en el dorso de la mano, con los ojos cerrados', tier: 3, hold: 4, tol: 90 },
       { t: 'sobre la cabeza, mientras aplaudes', tier: 3, hold: 3, tol: 85 },
       { t: 'en el antebrazo, mirando al techo', tier: 3, hold: 4, tol: 90 },
-      { t: 'sobre la cabeza', tier: 3, hold: 4, tol: 88, face: true },
       { t: 'en el codo, con el brazo doblado', tier: 3, hold: 3, tol: 88 },
       { t: 'en la punta de los dedos', tier: 4, hold: 3, tol: 95 },
       { t: 'sobre la cabeza, con los ojos cerrados', tier: 4, hold: 5, tol: 88 },
-      { t: 'en el dorso de la mano, brazo estirado', tier: 4, hold: 5, tol: 94, face: true },
+      { t: 'en el dorso de la mano, brazo estirado', tier: 4, hold: 5, tol: 94 },
       { t: 'sobre el pie, sentado', tier: 4, hold: 4, tol: 88 },
       { t: 'en el hombro, girando la cabeza a los lados', tier: 4, hold: 4, tol: 88 },
     ],
@@ -921,12 +923,14 @@ function drawPenance() {
 
 function nextTurnEquilibrio() {
   game.turn++;
-  const o = drawPlace();
-  const face = o.face ? pickFace() : FACE_ANY;
-  const f = o.face ? settings.faces[face - 1] : null;
+  const base = drawPlace();
+  const withFace = Math.random() < (FACE_CHANCE[game.level] || 0);
+  const o = { ...base, hold: base.hold + (withFace ? FACE_EXTRA_HOLD_S : 0) };
+  const face = withFace ? pickFace() : FACE_ANY;
+  const f = withFace ? settings.faces[face - 1] : null;
   game.order = o;
   game.face = face;
-  game.lastFace = o.face ? face : game.lastFace;
+  if (withFace) game.lastFace = face;
   game.challenge = (f ? `${f.name} arriba, ` : '') + `${o.t}, ${o.hold} s`;
   game.waiting = true;
   game.turnStart = performance.now();
