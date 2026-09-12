@@ -311,7 +311,7 @@
 'use strict';
 
 // ============================== Constantes ==============================
-const VERSION = 'PoC 0.5';
+const VERSION = 'PoC 0.5.2';
 const SERVICE_UUID = 'a5c0f000-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const STATUS_UUID  = 'a5c0f001-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const COMMAND_UUID = 'a5c0f002-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
@@ -319,7 +319,7 @@ const CMD = { SET_TARGET: 0x01, CLEAR: 0x02, SET_HOLD: 0x03 };
 const FACE_ANY = 7;           // objetivo "cualquier cara" (firmware 2)
 // Equilibrio: probabilidad de que la orden exija ademas una cara concreta, por nivel 1..4.
 // Cuando cae, el mantenimiento sube un segundo. Ajustar tras el playtest.
-const FACE_CHANCE = { 1: 0.0, 2: 0.25, 3: 0.5, 4: 0.7 };
+const FACE_CHANCE = { 1: 0.15, 2: 0.35, 3: 0.5, 4: 0.7 };
 const FACE_EXTRA_HOLD_S = 1;
 const PROTOCOL_MIN_EQ = 2;    // version minima de firmware para Equilibrio
 const EVT_PASS = 0x01;
