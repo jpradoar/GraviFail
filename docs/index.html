@@ -24,6 +24,7 @@
   .badge { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: var(--line); color: var(--muted); }
   .badge.on { background: var(--ok); color: #062; }
   .badge.sim { background: var(--accent); color: #321; }
+  .badge.retry { background: #6b4b00; color: #ffe0a0; }
   main { flex: 1; padding: 16px; display: flex; flex-direction: column; gap: 14px; max-width: 560px; width: 100%; margin: 0 auto; }
   section[hidden] { display: none; }
   section { display: flex; flex-direction: column; gap: 14px; }
@@ -41,49 +42,21 @@
   label { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); margin-bottom: 10px; }
   label.check { flex-direction: row; align-items: center; gap: 10px; color: var(--text); }
   label.check input { width: 22px; height: 22px; }
-  input, textarea, select { font: inherit; font-size: 16px; padding: 10px; border-radius: 10px;
+  input, textarea { font: inherit; font-size: 16px; padding: 10px; border-radius: 10px;
     border: 1px solid var(--line); background: var(--bg); color: var(--text); width: 100%; }
-  textarea { min-height: 120px; resize: vertical; }
+  textarea { min-height: 100px; resize: vertical; }
   .faces { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
   .faces label { flex-direction: row; align-items: center; gap: 8px; margin: 0; }
   .faces input[type=color] { width: 44px; height: 40px; padding: 2px; }
   .faces input[type=text] { flex: 1; }
 
-  /* Vista de juego */
-  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .card { border-radius: 18px; padding: 14px 10px; text-align: center; color: #111; min-height: 120px;
-    display: flex; flex-direction: column; justify-content: center; gap: 4px;
-    text-shadow: 0 1px 0 rgba(255,255,255,.35); }
-  .card .lbl { font-size: 12px; font-weight: 700; letter-spacing: 1px; opacity: .7; }
-  .card .val { font-size: 30px; font-weight: 800; line-height: 1.05; }
-  .card.none { background: var(--panel); color: var(--muted); text-shadow: none; }
-  .hint { text-align: center; font-size: 15px; color: var(--accent); min-height: 20px; font-weight: 600; }
-  .challenge { text-align: center; font-size: 28px; font-weight: 700; line-height: 1.2; min-height: 70px; }
-  .timer { font-size: 84px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; line-height: 1; }
-  .timer.urgent { color: var(--bad); }
-  .timer.safe { color: var(--accent); }
-  .timer.danger { color: var(--bad); animation: blink .6s infinite alternate; }
-  @keyframes blink { from { opacity: 1; } to { opacity: .45; } }
-  .bar { height: 14px; background: var(--line); border-radius: 999px; overflow: hidden; }
-  .bar > div { height: 100%; width: 100%; background: var(--accent); transition: width .1s linear; }
-  .bar.hold > div { background: var(--ok); width: 0; }
-  .stats { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
-  .big { font-size: 56px; font-weight: 800; text-align: center; }
-  .cal { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-  .cal .panel { text-align: center; }
-  .cal .v { font-size: 28px; font-weight: 700; }
-  .cal6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-
-  /* Modos */
   .modes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .mode { background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 12px; text-align: left; }
   .mode b { display: block; font-size: 17px; margin-bottom: 4px; }
   .mode span { font-size: 13px; color: var(--muted); line-height: 1.25; display: block; }
   .mode.sel { border-color: var(--accent); background: #2a2415; }
   .mode.sel b { color: var(--accent); }
-  .mode:disabled { opacity: .4; }
 
-  /* Jugadores */
   .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
   .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--line);
     border-radius: 999px; padding: 6px 6px 6px 12px; font-size: 15px; }
@@ -92,20 +65,33 @@
   .addrow input { flex: 1; }
   .addrow button { width: auto; padding: 10px 16px; }
 
-  /* Nombre en juego */
   .who { text-align: center; border-radius: 18px; padding: 16px; background: var(--panel); }
   .who .lbl { font-size: 12px; letter-spacing: 1px; color: var(--muted); font-weight: 700; }
-  .who .name { font-size: 44px; font-weight: 800; line-height: 1.1; }
+  .who .name { font-size: 40px; font-weight: 800; line-height: 1.1; }
   .who.transit { background: #2a2415; }
   .who.transit .name { color: var(--accent); }
-  .board { width: 100%; border-collapse: collapse; font-size: 18px; }
-  .board td { padding: 6px 4px; border-bottom: 1px solid var(--line); }
-  .board td:last-child { text-align: right; letter-spacing: 2px; }
-  .board tr.out td { color: var(--muted); text-decoration: line-through; }
+  .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .card { border-radius: 18px; padding: 14px 10px; text-align: center; color: #111; min-height: 120px;
+    display: flex; flex-direction: column; justify-content: center; gap: 4px;
+    text-shadow: 0 1px 0 rgba(255,255,255,.35); }
+  .card .lbl { font-size: 12px; font-weight: 700; letter-spacing: 1px; opacity: .7; }
+  .card .val { font-size: 30px; font-weight: 800; line-height: 1.05; }
+  .card.none { background: var(--panel); color: var(--muted); text-shadow: none; }
+  .challenge { text-align: center; font-size: 28px; font-weight: 700; line-height: 1.2; min-height: 70px; }
+  .timer { font-size: 84px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; line-height: 1; }
+  .timer.safe { color: var(--accent); }
+  .timer.danger { color: var(--bad); animation: blink .6s infinite alternate; }
+  @keyframes blink { from { opacity: 1; } to { opacity: .45; } }
+  .bar { height: 14px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .bar > div { height: 100%; width: 0; background: var(--ok); transition: width .1s linear; }
+  .stats { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); }
+  .big { font-size: 56px; font-weight: 800; text-align: center; }
+  .cal { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .cal .panel { text-align: center; }
+  .cal .v { font-size: 28px; font-weight: 700; }
+  .cal6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 
-  /* Reglas */
   .rules h2 { font-size: 20px; margin: 6px 0 0; color: var(--accent); }
-  .rules h3 { font-size: 17px; margin: 14px 0 6px; }
   .rules p, .rules li { font-size: 16px; line-height: 1.4; margin: 0 0 8px; }
   .rules ol, .rules ul { padding-left: 22px; margin: 0 0 8px; }
   .rules .tip { background: #1f2a1f; border-left: 4px solid var(--ok); padding: 8px 12px; border-radius: 8px; font-size: 15px; }
@@ -125,7 +111,7 @@
     <button id="bConnect" class="primary">Conectar cubo</button>
     <div class="modes" id="modes"></div>
     <div class="panel">
-      <h3>Jugadores <span class="muted" style="font-weight:400">(opcional: Equilibrio llama por nombre)</span></h3>
+      <h3>Jugadores <span class="muted" style="font-weight:400">(opcional: el presentador llama por nombre)</span></h3>
       <div class="chips" id="chips"></div>
       <div class="addrow">
         <input id="newName" type="text" maxlength="14" placeholder="Nombre" autocomplete="off">
@@ -146,32 +132,27 @@
   <!-- JUEGO -->
   <section id="vPlay" hidden>
     <div id="who" class="who" hidden><div class="lbl">LE TOCA A</div><div class="name" id="whoName">-</div></div>
-    <div id="turnUI">
     <div class="cards">
-      <div id="cardTarget" class="card"><div class="lbl">BUSCA</div><div class="val" id="targetVal">-</div></div>
+      <div id="cardTarget" class="card none"><div class="lbl">BUSCA</div><div class="val" id="targetVal">-</div></div>
       <div id="cardLive" class="card none"><div class="lbl">AHORA</div><div class="val" id="liveVal">?</div></div>
     </div>
-    <div id="hint" class="hint"></div>
     <div id="challenge" class="challenge"></div>
-    <div id="timer" class="timer">0.0</div>
-    <div class="bar" id="timeBarWrap"><div id="timeBar"></div></div>
-    <div class="bar hold"><div id="holdBar"></div></div>
+    <div id="timer" class="timer">PREPARA</div>
+    <div class="bar"><div id="holdBar"></div></div>
     <div class="stats">
-      <span>Turno <b id="turnNo">0</b></span>
-      <span id="playersStat"></span>
-      <span>Limite <b id="limit">0</b> s</span>
+      <span>Orden <b id="turnNo">0</b></span>
+      <span id="streakStat"></span>
+      <span id="levelStat"></span>
     </div>
     <button id="bSimPass" class="primary" hidden>Simular PASS</button>
-    <button id="bSurrender" class="small" hidden>Me rindo</button>
-    </div>
+    <button id="bSurrender" class="small">Me rindo</button>
     <button id="bAbort" class="small">Abortar partida</button>
   </section>
 
-  <!-- FIN DE RONDA / ELIMINACION -->
+  <!-- FIN DE RONDA -->
   <section id="vOver" hidden>
     <div class="big" id="overTitle">BOOM</div>
     <div class="panel" style="text-align:center; font-size:18px" id="overBody"></div>
-    <div class="panel" id="boardWrap" hidden><table class="board" id="board"></table></div>
     <button id="bNext" class="primary">Siguiente ronda</button>
     <button id="bHome" class="small">Volver al inicio</button>
   </section>
@@ -179,41 +160,29 @@
   <!-- AJUSTES -->
   <section id="vSettings" hidden>
     <div class="panel">
-      <h3>Variantes (aplican a todos los modos)</h3>
-      <label>Jugadores en Eliminacion<input id="sPlayers" type="number" min="2" max="12" step="1"></label>
-      <label class="check"><input id="sCallNames" type="checkbox"> Llamar por nombre en Equilibrio cuando hay jugadores cargados</label>
-      <label>Mecha de Equilibrio, minimo (s)<input id="sFuseMin" type="number" min="15" max="180" step="5"></label>
-      <label>Mecha de Equilibrio, maximo (s)<input id="sFuseMax" type="number" min="20" max="300" step="5"></label>
-      <label class="check"><input id="sHidden" type="checkbox"> Temporizador oculto: sin pitidos ni cuenta atras, explota cuando quiere</label>
-      <label class="check"><input id="sHint" type="checkbox"> Pista de cara opuesta: avisa cuando la cara buscada es la opuesta a la actual</label>
+      <h3>Mecha</h3>
+      <label>Mecha minima (s)<input id="sFuseMin" type="number" min="15" max="180" step="5"></label>
+      <label>Mecha maxima (s)<input id="sFuseMax" type="number" min="20" max="300" step="5"></label>
+      <label class="check"><input id="sCallNames" type="checkbox"> Llamar por nombre cuando hay jugadores cargados</label>
     </div>
     <div class="panel">
-      <h3>Tiempos</h3>
-      <label>Tiempo del primer turno (s)<input id="sT0" type="number" min="3" max="60" step="1"></label>
-      <label>Tiempo minimo por turno (s)<input id="sTmin" type="number" min="2" max="60" step="1"></label>
-      <label>Factor de reduccion por turno (0.5 a 1)<input id="sFactor" type="number" min="0.5" max="1" step="0.01"></label>
-      <label>Segundos quieto para dar PASS<input id="sHold" type="number" min="0.5" max="5" step="0.1"></label>
-    </div>
-    <div class="panel">
-      <h3>Packs de retos</h3>
-      <div id="packsEdit"></div>
-      <label>Retos propios, uno por linea<textarea id="sCustom" placeholder="con el sombrero de Juan puesto&#10;mientras imitas a un gato"></textarea></label>
-      <div class="muted">Los retos no se repiten dentro de una partida hasta agotar la baraja.</div>
-    </div>
-    <div class="panel">
-      <h3>Lugares de Equilibrio</h3>
+      <h3>Poses</h3>
       <div id="placePacksEdit"></div>
     </div>
     <div class="panel">
-      <h3>Prendas al explotar (Equilibrio)</h3>
+      <h3>Prendas al explotar</h3>
       <div id="penancePacksEdit"></div>
       <label>Prendas propias, una por linea<textarea id="sPenances" placeholder="cantar el estribillo de una cancion que elija el grupo&#10;hablar con acento hasta tu proximo turno"></textarea></label>
       <div class="muted">El juego no propone bebidas. Si el grupo quiere, las escribe aqui.</div>
     </div>
     <div class="panel">
       <h3>Caras del cubo</h3>
-      <div class="muted" style="margin-bottom:8px">Nombre y color que se muestran en pantalla. El cubo fisico no lleva marcas.</div>
+      <div class="muted" style="margin-bottom:8px">Nombre y color que se muestran en pantalla cuando una orden pide cara. El cubo fisico no lleva marcas.</div>
       <div id="facesEdit" class="faces"></div>
+    </div>
+    <div class="panel">
+      <h3>Calibracion</h3>
+      <label>Segundos quieto para las pruebas de Calibracion<input id="sHold" type="number" min="0.5" max="5" step="0.1"></label>
     </div>
     <button id="bSaveSettings" class="primary">Guardar</button>
     <button id="bResetSettings" class="small">Restaurar valores por defecto</button>
@@ -224,68 +193,56 @@
   <section id="vRules" hidden>
     <button id="bBackRulesTop" class="small">Volver</button>
     <div class="panel rules">
-      <h2>Lo basico, en todos los modos</h2>
-      <p>El movil se deja en el centro de la mesa. Manda el movil, juzga el cubo, y vigila el grupo.</p>
+      <h2>Dos reglas</h2>
+      <p><b>No lo sujetes.</b> Mientras el cubo cuenta, la mano que lo sostiene con los dedos extendidos y la otra mano abierta y a la vista. Si el cubo esta en la cabeza o el hombro, las dos manos abiertas y a la vista.</p>
+      <p><b>No mires la pantalla</b> (solo en Ojos y Manos). Quien tiene el cubo juega a ciegas; quien lo paso mira por el.</p>
+      <p>El grupo vigila las dos. Sin discusiones largas: la mecha corre.</p>
+
+      <h2>Lo basico</h2>
+      <p>El movil se deja en el centro de la mesa. Manda el movil, juzga el cubo, vigila el grupo.</p>
       <ol>
-        <li>El movil dicta una orden con dos partes: <b>una cara</b> ("cara azul arriba") y <b>un reto</b> ("con una sola mano").</li>
-        <li>Quien tiene el cubo busca la cara. El cubo no lleva marcas: la pantalla muestra en <b>Busca</b> la cara pedida y en <b>Ahora</b> la que el cubo tiene arriba en ese momento. Cuando los dos colores coinciden, vas bien.</li>
-        <li>Mientras buscas, haces el reto. El grupo vigila que lo cumplas. Si no lo cumples, el grupo te lo dice y lo corriges. Sin discusiones largas: el tiempo corre.</li>
-        <li>Con la cara correcta arriba, <b>manten el cubo quieto dos segundos</b>. La barra verde se llena. El cubo da el PASS y el movil grita "Pasalo".</li>
-        <li>Pasas el cubo. Antes de soltarlo puedes girarlo y desordenarlo todo lo que quieras.</li>
-        <li>Si el tiempo llega a cero antes del PASS: <b>BOOM</b>. Quien tiene el cubo en ese momento se lleva la explosion.</li>
-      </ol>
-      <p>Con cada PASS el tiempo del siguiente turno se acorta. Cuando la pantalla parpadea en rojo, queda menos de un tercio.</p>
-      <div class="tip">Si mueves el cubo deprisa, la pantalla no muestra ninguna cara. El cubo solo lee la cara cuando se mueve despacio. Es asi a proposito.</div>
-
-      <h2>Eliminacion</h2>
-      <p class="req">Sin nombres. En Ajustes se indica cuantos jugadores hay.</p>
-      <ul>
-        <li>El cubo va en circulo. Cada turno pide una cara concreta arriba y un reto; sin gracia ni mecha compartida: es el diseño original, que se conserva como referencia.</li>
-        <li>Quien tiene el cubo al explotar <b>queda fuera</b> y sale del circulo.</li>
-        <li>La siguiente ronda empieza con el tiempo inicial completo, para los que quedan.</li>
-        <li>Gana quien queda cuando todos los demas han explotado.</li>
-      </ul>
-
-      <h2>Equilibrio</h2>
-      <p class="req">De 3 a 6 jugadores, sentados. Nombres opcionales. Necesita el firmware 2 del cubo; la web avisa si no lo tiene.</p>
-      <ul>
-        <li>Cada orden es una <b>pose con nombre</b>: "¡El Camarero! Cubo en el dorso de la mano, tres segundos". A veces exige ademas una cara: "El Faraon, cara azul arriba, cuatro segundos".</li>
-        <li>El cubo va en circulo. Si hay jugadores cargados, el presentador <b>dice el nombre y la orden juntos</b>. Despues hay <b>dos segundos de gracia</b> con la mecha parada para que el cubo llegue y te prepares. Suena un aviso: desde ahi el cubo juzga y la mecha corre.</li>
-        <li>Coloca el cubo donde se pide y <b>no lo sujetes</b>. El grupo vigila eso. El cubo vigila lo demas: si se inclina o se mueve, la barra verde vuelve a cero y empiezas a contar otra vez.</li>
-        <li>Cuando la barra verde se llena, PASS. Pasa el cubo al siguiente.</li>
-        <li><b>La mecha es compartida</b>: un unico tiempo para toda la ronda, que no se reinicia al pasar. Cada segundo que tardas en pasar lo quemas tu. El reloj <b>cuenta hacia arriba</b>: en ambar mientras la mecha aun no puede explotar, en rojo parpadeante cuando ya puede hacerlo en cualquier momento. Nadie sabe el segundo exacto. Los pitidos se aceleran cuando queda poco.</li>
-        <li>Cuando explota, quien tiene el cubo <b>cumple una prenda</b> que dicta el movil. Despues, nueva ronda con mecha nueva.</li>
-        <li>Con cada pase los lugares se ponen mas dificiles: palma, rodilla, dorso de la mano, antebrazo, hombro, cabeza, dos dedos.</li>
+        <li>El presentador dicta una <b>pose con nombre</b> y un <b>tiempo</b>: "¡El Camarero! Cubo en el dorso de la mano, tres segundos". A veces exige ademas una cara: "El Faraon, cara azul arriba, cuatro segundos". La pantalla muestra en <b>Busca</b> la cara pedida y en <b>Ahora</b> la que el cubo tiene arriba.</li>
+        <li>Al terminar de hablar hay <b>dos segundos de gracia</b> con la mecha parada: coloca el cubo y preparate. Suena un aviso: desde ahi el cubo juzga y la mecha corre.</li>
+        <li>El cubo juzga que este <b>nivelado y quieto</b>. La barra verde se llena; si se inclina o se mueve, vuelve a cero y empiezas a contar otra vez.</li>
+        <li>Barra llena: PASS. Pasa el cubo al siguiente. Antes de soltarlo puedes girarlo y desordenarlo.</li>
+        <li><b>La mecha es compartida</b>: un unico tiempo para toda la ronda, que no se reinicia al pasar. Cada segundo que tardas en pasar lo quemas tu. El reloj cuenta hacia arriba: ambar mientras la mecha aun no puede explotar, rojo parpadeante cuando ya puede hacerlo en cualquier momento. Nadie sabe el segundo exacto. Los pitidos se aceleran.</li>
+        <li>Cuando explota, quien tiene el cubo <b>cumple una prenda</b> que dicta el movil. Despues, mecha nueva.</li>
+        <li>Con cada pase las poses se ponen mas dificiles: palma, rodilla, dorso de la mano, antebrazo, hombro, cabeza, dos dedos.</li>
         <li>Si el cubo se cae, lo recoges y sigues. El tiempo no se para.</li>
         <li><b>Racha del grupo</b>: los pases seguidos en una misma mecha son el record de la mesa. Se anuncia al explotar.</li>
         <li><b>Rendicion</b>: si no puedes o no quieres, boton "Me rindo". Prenda inmediata, la mecha se detiene mientras la cumples, y el cubo pasa.</li>
+      </ol>
+      <div class="tip">Si mueves el cubo deprisa, la pantalla no muestra ninguna cara. El cubo solo lee la cara cuando se mueve despacio. Es asi a proposito.</div>
+
+      <h2>Equilibrio</h2>
+      <p class="req">De 3 a 6 jugadores, sentados. Nombres opcionales.</p>
+      <ul>
+        <li>El cubo va en circulo. Quien lo tiene puede mirar la pantalla.</li>
+        <li>Si hay jugadores cargados, el presentador dice el nombre y la orden juntos, y el cubo viaja hasta esa persona durante la gracia.</li>
       </ul>
 
       <h2>Ojos y Manos</h2>
-      <p class="req">Igual que Equilibrio, con dos roles por turno. De 2 a 6 jugadores. Con dos, se alternan.</p>
+      <p class="req">De 2 a 6 jugadores. Con dos, se alternan.</p>
       <ul>
-        <li>Quien tiene el cubo son <b>las manos</b>: coloca, aguanta y <b>no mira la pantalla</b>. El grupo vigila que no mire, igual que vigila la postura.</li>
-        <li>Quien acaba de pasar el cubo son <b>los ojos</b>: mira la pantalla, ve que cara detecta el cubo y como se llena la barra verde, y le grita a las manos lo que tiene que hacer: "girala, esa no, quieto, aguanta, ya, pasalo".</li>
-        <li>El presentador dice los dos nombres si hay jugadores cargados: "El cubo para Ana. Los ojos, Bruno." Sin nombres, la regla es fija: quien lo paso, a la pantalla.</li>
-        <li>Si explota, la <b>prenda es para los dos</b>: manos y ojos.</li>
-        <li>Todo lo demas es Equilibrio: mecha compartida, gracia, poses, racha y rendicion.</li>
+        <li>Quien tiene el cubo son <b>las manos</b>: coloca, aguanta y no mira la pantalla.</li>
+        <li>Quien acaba de pasar el cubo son <b>los ojos</b>: mira la pantalla, ve que cara detecta el cubo y como se llena la barra verde, y le grita a las manos: "girala, esa no, quieto, aguanta, ya, pasalo".</li>
+        <li>El presentador dice los dos nombres si hay jugadores cargados: "¡Ana! Los ojos, Bruno." Sin nombres, la regla es fija: quien lo paso, a la pantalla.</li>
+        <li>Si explota, la <b>prenda es para los dos</b>.</li>
       </ul>
 
-      <h2>Variantes</h2>
-      <p>Se activan en Ajustes.</p>
+      <h2>Ajustes</h2>
       <ul>
-        <li><b>Temporizador oculto.</b> Sin pitidos ni cuenta atras. La bomba explota cuando quiere, un poco antes o un poco despues del tiempo normal. Solo se ve la barra verde del PASS.</li>
-        <li><b>Pista de cara opuesta.</b> Si la cara que buscas es justo la opuesta a la que tienes arriba, la pantalla te lo dice. Para grupos que empiezan o para niños.</li>
-        <li><b>Packs de retos.</b> Bar y oficina, para hacer en publico sin molestar. Fiesta, con mas cuerpo y mas ruido. Familiar y niños, simple y sin picardia. Y los retos que escriba el grupo en la mesa, que suelen ser los mejores.</li>
+        <li><b>Mecha</b>: entre que minimo y que maximo puede explotar. Por defecto de 40 a 80 segundos.</li>
+        <li><b>Poses</b>: Sentado, el mazo base; Mesa y de pie, con recorridos y levantarse. Cuidado con los vasos.</li>
+        <li><b>Prendas</b>: Fisicas, Sociales, y las que escriba el grupo, que suelen ser las mejores.</li>
       </ul>
 
       <h2>Dudas frecuentes</h2>
       <ul>
-        <li><b>Se me ha caido el cubo o lo he soltado antes del PASS.</b> Lo recoges y sigues. El tiempo no se para.</li>
-        <li><b>He dado el PASS sin hacer el reto.</b> El grupo decide: lo normal es que quien pasa el cubo lo haga con el reto ya cumplido. Si no, el grupo se lo devuelve y pierde tiempo del siguiente turno de todos. Con eso basta.</li>
-        <li><b>El cubo no detecta la cara.</b> Muevelo mas despacio y apoyalo plano. Si esta inclinado sobre una arista, no cuenta.</li>
-        <li><b>En Equilibrio, ¿puedo tocar el cubo mientras cuenta?</b> No. Colocarlo si, sujetarlo no. Si se te cae, lo vuelves a poner y el contador empieza de cero.</li>
+        <li><b>Se me ha caido el cubo.</b> Lo recoges, lo vuelves a poner y el contador empieza de cero. El tiempo no se para.</li>
+        <li><b>El cubo no detecta la cara.</b> Muevelo mas despacio y apoyalo plano. Si esta inclinado, no cuenta.</li>
         <li><b>Hay discusion sobre quien tenia el cubo al explotar.</b> Lo tenia quien lo tocaba. Si lo tocaban dos, la explosion es de quien lo recibia.</li>
+        <li><b>No se oye el movil.</b> Un altavoz Bluetooth pequeño emparejado al movil, en el centro de la mesa, lo resuelve. En un bar es casi obligatorio.</li>
       </ul>
     </div>
     <button id="bBackRules" class="small">Volver</button>
@@ -310,32 +267,28 @@
 'use strict';
 
 // ============================== Constantes ==============================
-const VERSION = 'PoC 0.7';
+const VERSION = 'PoC 0.8';
 const SERVICE_UUID = 'a5c0f000-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const STATUS_UUID  = 'a5c0f001-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const COMMAND_UUID = 'a5c0f002-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const CMD = { SET_TARGET: 0x01, CLEAR: 0x02, SET_HOLD: 0x03 };
 const FACE_ANY = 7;           // objetivo "cualquier cara" (firmware 2)
-// Equilibrio: probabilidad de que la orden exija ademas una cara concreta, por nivel 1..4.
-// Cuando cae, el mantenimiento sube un segundo. Ajustar tras el playtest.
+const EVT_PASS = 0x01;
+const PROTOCOL_MIN = 2;       // version minima de firmware
+const GRACE_MS = 2000;        // gracia tras oir la orden completa, con la mecha pausada
+// Probabilidad de que la orden exija ademas una cara concreta, por nivel 1..4. Cuando cae, un segundo mas.
 const FACE_CHANCE = { 1: 0.15, 2: 0.35, 3: 0.5, 4: 0.7 };
 const FACE_EXTRA_HOLD_S = 1;
-const PROTOCOL_MIN_EQ = 2;    // version minima de firmware para Equilibrio
-const EVT_PASS = 0x01;
-const OPPOSITE = { 1: 2, 2: 1, 3: 4, 4: 3, 5: 6, 6: 5 };
-const TRANSIT_MS = 2200;   // modos con nombre antiguos: desde el nombre hasta la orden
-const GRACE_MS = 2000;     // Equilibrio: gracia tras oir la orden completa, con la mecha pausada, antes de que el cubo juzgue
+const RECONNECT_TRIES = 4;    // reintentos de reconexion BLE antes de pasar a simulacion
+const RECONNECT_GAP_MS = 1500;
 
 const MODES = {
-  equilibrio:  { name: 'Equilibrio',  names: false, desc: 'Coloca el cubo en la cabeza, el dorso de la mano, el antebrazo... y aguanta quieto. Mecha compartida: el tiempo no se reinicia al pasar. Quien explota, prenda.' },
-  ojos:        { name: 'Ojos y Manos', names: false, desc: 'Como Equilibrio, pero quien tiene el cubo no mira la pantalla. Quien acaba de pasarlo mira por el y le grita: girala, quieto, aguanta, ya. Si explota, prenda para los dos.' },
-  eliminacion: { name: 'Eliminacion', names: false, desc: 'Quien tiene el cubo al explotar queda fuera. Gana quien queda. Sin nombres, solo un conteo.' },
+  equilibrio: { name: 'Equilibrio',   desc: 'Coloca el cubo en la cabeza, el dorso de la mano, el antebrazo... y aguanta quieto. Mecha compartida: el tiempo no se reinicia al pasar. Quien explota, prenda.' },
+  ojos:       { name: 'Ojos y Manos', desc: 'Como Equilibrio, pero quien tiene el cubo no mira la pantalla. Quien acaba de pasarlo mira por el y le grita: girala, quieto, aguanta, ya. Si explota, prenda para los dos.' },
 };
-function isEqMode(m) { return m === 'equilibrio' || m === 'ojos'; }
-function isEq() { return !!game && isEqMode(game.mode); }
 
-// Lugares de Equilibrio. tier 1 facil .. 4 dificil. hold en segundos. tol: 85 normal, 90 estricto, 95 muy estricto.
-// La cara se añade como modificador aleatorio segun el nivel (FACE_CHANCE), no va fija en el lugar.
+// ---------- CONTENIDO EDITABLE ----------
+// Poses. tier 1 facil .. 4 dificil. hold en segundos. tol: 85 normal, 90 estricto, 95 muy estricto.
 const PLACES = {
   sentado: {
     name: 'Sentado', desc: 'Se juega sin levantarse. Es el mazo base.',
@@ -343,6 +296,7 @@ const PLACES = {
       { n: 'La Bandeja',            t: 'en la palma de la mano', tier: 1, hold: 2, tol: 85 },
       { n: 'El Regazo',             t: 'sobre la rodilla', tier: 1, hold: 2, tol: 85 },
       { n: 'La Estatua',            t: 'en la palma, con el brazo estirado', tier: 1, hold: 3, tol: 88 },
+      { n: 'El Perezoso',           t: 'sobre el hombro, sin manos', tier: 1, hold: 3, tol: 85 },
       { n: 'El Camarero',           t: 'en el dorso de la mano', tier: 2, hold: 3, tol: 90 },
       { n: 'El Mayordomo',          t: 'sobre el antebrazo', tier: 2, hold: 3, tol: 88 },
       { n: 'El Loro',               t: 'en el hombro', tier: 2, hold: 3, tol: 85 },
@@ -375,19 +329,6 @@ const PLACES = {
   },
 };
 
-// Frases del presentador. Cortas: nunca retrasan la orden mas de un par de segundos.
-const PRESENTER = {
-  intro: ['Bienvenidos a GraviFail. El cubo no perdona un temblor.', 'Silencio en la sala. El cubo juzga.', 'Manos firmes. La mecha es de todos.'],
-  passOk: ['¡Pasalo!', '¡Limpio! Pasalo.', 'Aceptado. ¡Pasalo!', 'Ni un temblor. ¡Pasalo!'],
-  passClose: ['¡Por los pelos! Pasalo ya.', 'Eso ha sido justo. ¡Pasalo!', 'Casi te lo comes. ¡Pasalo!'],
-  passStreak: ['Tres seguidos. El cubo empieza a respetaros.', 'Que racha. No os acostumbreis.', 'Impresionante. Ahora lo dificil.'],
-  boom: ['¡Boom! Ahi se quedo.', '¡Boom! El cubo ha hablado.', '¡Boom! Que temblor tan feo.', '¡Boom! Lo tenias y lo sabias.'],
-  record: ['Record del grupo. Enmarcadlo.', 'Nuevo record. Casi parece que sabeis jugar.'],
-  surrender: ['Rendicion aceptada. Hay prenda igual.', 'Te rindes. El cubo no olvida.'],
-  newFuse: ['Mecha nueva. Nadie sabe cuando.', 'Otra mecha. Respirad ahora que podeis.', 'Mecha encendida. Suerte.'],
-};
-function say(key) { const a = PRESENTER[key]; return a[Math.floor(Math.random() * a.length)]; }
-
 const PENANCES = {
   fisicas: {
     name: 'Fisicas', desc: 'Cuerpo, sin material.',
@@ -408,59 +349,26 @@ const PENANCES = {
   },
 };
 
-// Packs de retos. Todos se pueden hacer sentado o de pie junto a una mesa.
-const PACKS = {
-  bar: {
-    name: 'Bar y oficina',
-    desc: 'Se puede hacer en publico sin molestar demasiado.',
-    items: [
-      'con una sola mano', 'con la mano que no usas normalmente', 'con los ojos cerrados',
-      'sobre tu cabeza', 'con los codos pegados al cuerpo', 'sin usar los pulgares',
-      'con las manos por detras de la espalda', 'con el brazo completamente estirado',
-      'mirando al techo', 'de pie', 'de espaldas a la mesa', 'apoyando solo los meñiques',
-      'con el cubo pegado a la barbilla', 'sin doblar los codos', 'con las dos manos juntas como si rezaras',
-      'por debajo de la mesa', 'a la altura de los ojos de la persona de tu izquierda',
-      'mientras dices el abecedario', 'mientras cuentas hacia atras desde veinte',
-      'sin dejar de mirar a la persona de tu derecha', 'con una ceja levantada',
-      'susurrando lo que haces', 'con el cubo apoyado en el hombro', 'sin que se te vean los dientes',
-      'con la cabeza inclinada hacia un lado', 'mientras silbas',
-    ],
-  },
-  fiesta: {
-    name: 'Fiesta',
-    desc: 'Mas ruido, mas cuerpo, mas ridiculo.',
-    items: [
-      'a la pata coja', 'de rodillas', 'mientras cantas', 'con la lengua fuera',
-      'bailando sin parar', 'con voz de robot narrando cada movimiento', 'mientras das vueltas sobre ti mismo',
-      'sentado en el suelo', 'con el cubo entre las rodillas', 'imitando a un animal que elija el grupo',
-      'con acento raro explicando lo que haces', 'en cuclillas', 'con una mano en la cadera todo el rato',
-      'gritando cada vez que gires el cubo', 'con cara de enfado', 'riendo sin parar',
-      'con los ojos cerrados y girando sobre ti mismo', 'saltando', 'como si el cubo pesara cien kilos',
-      'a camara lenta', 'como si fuera una bomba de verdad', 'con el cubo sobre el dorso de la mano',
-      'mientras el resto te abuchea', 'mirando fijamente a quien te lo paso', 'de puntillas',
-    ],
-  },
-  familiar: {
-    name: 'Familiar y niños',
-    desc: 'Retos simples y fisicos, sin picardia.',
-    items: [
-      'sobre tu cabeza', 'con una sola mano', 'con los ojos cerrados', 'de pie', 'de rodillas',
-      'a la pata coja', 'sentado en el suelo', 'con el cubo muy lejos del cuerpo', 'con el cubo muy cerca de la nariz',
-      'diciendo un animal por cada giro', 'contando en voz alta', 'con voz de bebe', 'con voz muy grave',
-      'con la boca abierta', 'como un robot', 'como una tortuga', 'como un pirata',
-      'dando un salto antes de empezar', 'aplaudiendo primero tres veces', 'con las rodillas juntas',
-      'sin mover los pies', 'de puntillas', 'con el cubo debajo de la barbilla', 'con los brazos muy arriba',
-      'mientras cantas cumpleaños feliz',
-    ],
-  },
+// Frases del presentador. Cortas: nunca retrasan la orden mas de un par de segundos.
+const PRESENTER = {
+  intro: ['Bienvenidos a GraviFail. El cubo no perdona un temblor.', 'Silencio en la sala. El cubo juzga.', 'Manos firmes. La mecha es de todos.'],
+  rules: 'Dos reglas: no lo sujetes, manos abiertas y a la vista.',
+  rulesEyes: 'Dos reglas: no lo sujetes, y quien tiene el cubo no mira la pantalla.',
+  passOk: ['¡Pasalo!', '¡Limpio! Pasalo.', 'Aceptado. ¡Pasalo!', 'Ni un temblor. ¡Pasalo!'],
+  passClose: ['¡Por los pelos! Pasalo ya.', 'Eso ha sido justo. ¡Pasalo!', 'Casi te lo comes. ¡Pasalo!'],
+  passStreak: ['Tres seguidos. El cubo empieza a respetaros.', 'Que racha. No os acostumbreis.', 'Impresionante. Ahora lo dificil.'],
+  boom: ['¡Boom! Ahi se quedo.', '¡Boom! El cubo ha hablado.', '¡Boom! Que temblor tan feo.', '¡Boom! Lo tenias y lo sabias.'],
+  record: ['Record del grupo. Enmarcadlo.', 'Nuevo record. Casi parece que sabeis jugar.'],
+  surrender: ['Rendicion aceptada. Hay prenda igual.', 'Te rindes. El cubo no olvida.'],
+  newFuse: ['Mecha nueva. Nadie sabe cuando.', 'Otra mecha. Respirad ahora que podeis.', 'Mecha encendida. Suerte.'],
 };
+function say(key) { const a = PRESENTER[key]; return Array.isArray(a) ? a[Math.floor(Math.random() * a.length)] : a; }
+// ---------- FIN DEL CONTENIDO EDITABLE ----------
 
 const DEFAULTS = {
-  mode: 'equilibrio', players: 4, lives: 3, names: [], callNames: true, hidden: false, hint: false,
+  mode: 'equilibrio', names: [], callNames: true,
   fuseMin: 40, fuseMax: 80, placePacks: ['sentado'], penancePacks: ['fisicas', 'sociales'], customPenances: [],
-  t0: 15, tMin: 4, factor: 0.9, holdS: 2.0,
-  packs: ['bar'],
-  custom: [],
+  holdS: 2.0,
   faces: [
     { name: 'Roja',     color: '#e63946' },
     { name: 'Azul',     color: '#3a86ff' },
@@ -473,7 +381,7 @@ const DEFAULTS = {
 
 // ============================== Estado ==============================
 let settings = loadSettings();
-let ble = { device: null, cmd: null, connected: false, oldFirmware: false, version: 0 };
+let ble = { device: null, cmd: null, connected: false, version: 0, oldFirmware: false, reconnecting: false };
 let cube = { face: 0, stable: 0, fault: false, progress: 0, target: 0 };
 let game = null;
 let audio = null;
@@ -488,45 +396,24 @@ function loadSettings() {
     const raw = localStorage.getItem('gravifail.settings') || localStorage.getItem('artefacto.settings');
     if (!raw) return base;
     const s = JSON.parse(raw);
-    delete s.challenges; // formato de la version 0.1
-    if (s.mode === 'libre') s.mode = 'clasico'; // version 0.2
-    if (s.mode === 'victima') s.mode = 'clasico'; // version 0.5: Victima eliminado
-    if (s.mode === 'azar') s.mode = 'equilibrio';  // version 0.6: Al azar se pliega en Equilibrio
-    if (s.mode === 'clasico') s.mode = 'equilibrio'; // version 0.7: Clasico retirado
-    return Object.assign(base, s);
+    if (!MODES[s.mode]) s.mode = 'equilibrio';   // modos retirados (libre, clasico, eliminacion, azar, victima)
+    const out = Object.assign(base, s);
+    Object.keys(out).forEach(k => { if (!(k in DEFAULTS)) delete out[k]; });   // ajustes de versiones antiguas
+    return out;
   } catch { return base; }
 }
 function saveSettings() { localStorage.setItem('gravifail.settings', JSON.stringify(settings)); }
-function getRecord() { return parseInt(localStorage.getItem('gravifail.record') || localStorage.getItem('artefacto.record') || '0', 10); }
 function getRecordMecha() { return parseInt(localStorage.getItem('gravifail.recordMecha') || '0', 10); }
 function setRecordMecha(n) { localStorage.setItem('gravifail.recordMecha', String(n)); }
-function setRecord(n) { localStorage.setItem('gravifail.record', String(n)); }
 
 function renderSettings() {
-  $('sPlayers').value = settings.players;
-  $('sCallNames').checked = settings.callNames !== false;
   $('sFuseMin').value = settings.fuseMin;
   $('sFuseMax').value = settings.fuseMax;
+  $('sCallNames').checked = settings.callNames !== false;
   $('sPenances').value = settings.customPenances.join('\n');
-  renderPackChecks('placePacksEdit', PLACES, settings.placePacks, 'place');
-  renderPackChecks('penancePacksEdit', PENANCES, settings.penancePacks, 'penance');
-  $('sHidden').checked = settings.hidden;
-  $('sHint').checked = settings.hint;
-  $('sT0').value = settings.t0;
-  $('sTmin').value = settings.tMin;
-  $('sFactor').value = settings.factor;
   $('sHold').value = settings.holdS;
-  $('sCustom').value = settings.custom.join('\n');
-  const pw = $('packsEdit');
-  pw.innerHTML = '';
-  Object.keys(PACKS).forEach(key => {
-    const p = PACKS[key];
-    const l = document.createElement('label');
-    l.className = 'check';
-    l.innerHTML = `<input type="checkbox" data-pack="${key}" ${settings.packs.includes(key) ? 'checked' : ''}>
-                   <span><b>${p.name}</b> (${p.items.length}) <span class="muted">${p.desc}</span></span>`;
-    pw.appendChild(l);
-  });
+  renderPackChecks('placePacksEdit', PLACES, settings.placePacks);
+  renderPackChecks('penancePacksEdit', PENANCES, settings.penancePacks);
   const wrap = $('facesEdit');
   wrap.innerHTML = '';
   settings.faces.forEach((f, i) => {
@@ -537,55 +424,38 @@ function renderSettings() {
   });
 }
 function readSettingsForm() {
-  settings.players = clamp(parseInt($('sPlayers').value, 10) || DEFAULTS.players, 2, 12);
-  settings.callNames = $('sCallNames').checked;
   settings.fuseMin = clamp(parseInt($('sFuseMin').value, 10) || DEFAULTS.fuseMin, 15, 180);
   settings.fuseMax = clamp(parseInt($('sFuseMax').value, 10) || DEFAULTS.fuseMax, settings.fuseMin + 5, 300);
+  settings.callNames = $('sCallNames').checked;
   settings.customPenances = $('sPenances').value.split('\n').map(x => x.trim()).filter(Boolean);
+  settings.holdS = clamp(parseFloat($('sHold').value) || DEFAULTS.holdS, 0.5, 5);
   settings.placePacks = Array.from($('placePacksEdit').querySelectorAll('input:checked')).map(i => i.dataset.pack);
   settings.penancePacks = Array.from($('penancePacksEdit').querySelectorAll('input:checked')).map(i => i.dataset.pack);
-  settings.hidden = $('sHidden').checked;
-  settings.hint = $('sHint').checked;
-  settings.t0 = clamp(parseFloat($('sT0').value) || DEFAULTS.t0, 3, 60);
-  settings.tMin = clamp(parseFloat($('sTmin').value) || DEFAULTS.tMin, 2, 60);
-  settings.factor = clamp(parseFloat($('sFactor').value) || DEFAULTS.factor, 0.5, 1);
-  settings.holdS = clamp(parseFloat($('sHold').value) || DEFAULTS.holdS, 0.5, 5);
-  settings.custom = $('sCustom').value.split('\n').map(s => s.trim()).filter(Boolean);
-  settings.packs = Array.from($('packsEdit').querySelectorAll('input:checked')).map(i => i.dataset.pack);
   $('facesEdit').querySelectorAll('input').forEach(inp => {
     const f = settings.faces[+inp.dataset.i];
     f[inp.dataset.k] = inp.dataset.k === 'name' ? (inp.value.trim() || `Cara ${+inp.dataset.i + 1}`) : inp.value;
   });
   saveSettings();
 }
-function renderPackChecks(elId, packs, selected, kind) {
+function renderPackChecks(elId, packs, selected) {
   const wrap = $(elId);
   wrap.innerHTML = '';
   Object.keys(packs).forEach(key => {
     const p = packs[key];
     const l = document.createElement('label');
     l.className = 'check';
-    l.innerHTML = `<input type="checkbox" data-pack="${key}" data-kind="${kind}" ${selected.includes(key) ? 'checked' : ''}>
+    l.innerHTML = `<input type="checkbox" data-pack="${key}" ${selected.includes(key) ? 'checked' : ''}>
                    <span><b>${p.name}</b> (${p.items.length}) <span class="muted">${p.desc}</span></span>`;
     wrap.appendChild(l);
   });
 }
-
 function renderHomeSummary() {
-  const packs = settings.packs.map(k => PACKS[k] ? PACKS[k].name : k);
-  if (settings.custom.length) packs.push(`${settings.custom.length} propios`);
   const m = MODES[settings.mode] || MODES.equilibrio;
-  let mode = m.name;
-  if (settings.mode === 'eliminacion') mode += `, ${settings.players} jugadores`;
-  if (m.names) mode += `, ${settings.names.length} jugadores, ${settings.lives} vidas`;
-  if (isEqMode(settings.mode)) {
-    mode += `, mecha ${settings.fuseMin} a ${settings.fuseMax} s`;
-    if (settings.names.length >= 2 && settings.callNames !== false) mode += `, llama por nombre a ${settings.names.length}`;
-  }
-  const extras = [settings.hidden ? 'temporizador oculto' : '', settings.hint ? 'pista de opuesta' : ''].filter(Boolean).join(', ');
-  $('homeSummary').innerHTML = `<b>${mode}</b>${extras ? ', ' + extras : ''}<br>
-    Retos: ${packs.join(', ') || 'ninguno'}<br>
-    Primer turno ${settings.t0} s, minimo ${settings.tMin} s, quieto ${settings.holdS} s<br>
+  let mode = `${m.name}, mecha ${settings.fuseMin} a ${settings.fuseMax} s`;
+  if (usesNames()) mode += `, llama por nombre a ${settings.names.length}`;
+  const packs = settings.placePacks.map(k => PLACES[k] ? PLACES[k].name : k).join(', ') || 'ninguno';
+  const pens = settings.penancePacks.map(k => PENANCES[k] ? PENANCES[k].name : k).concat(settings.customPenances.length ? [`${settings.customPenances.length} propias`] : []).join(', ') || 'ninguna';
+  $('homeSummary').innerHTML = `<b>${mode}</b><br>Poses: ${packs}<br>Prendas: ${pens}<br>
     Racha record del grupo: <b>${getRecordMecha()}</b> pases en una mecha`;
 }
 
@@ -609,8 +479,8 @@ function renderChips() {
   settings.names.forEach((n, i) => {
     const c = document.createElement('span');
     c.className = 'chip';
-    c.innerHTML = `${escapeHtml(n)} <button type="button" data-i="${i}" title="Quitar">x</button>`;
-    c.querySelector('button').onclick = () => { settings.names.splice(i, 1); saveSettings(); renderChips(); renderHomeSummary(); updateStartButton(); };
+    c.innerHTML = `${escapeHtml(n)} <button type="button" title="Quitar">x</button>`;
+    c.querySelector('button').onclick = () => { settings.names.splice(i, 1); saveSettings(); renderChips(); renderHomeSummary(); };
     wrap.appendChild(c);
   });
 }
@@ -620,34 +490,14 @@ function addName() {
   if (settings.names.length >= 12) { $('newName').value = ''; return; }
   if (!settings.names.some(n => n.toLowerCase() === v.toLowerCase())) settings.names.push(v);
   $('newName').value = '';
-  saveSettings(); renderChips(); renderHomeSummary(); updateStartButton();
+  saveSettings(); renderChips(); renderHomeSummary();
   $('newName').focus();
 }
+function usesNames() { return settings.names.length >= 2 && settings.callNames !== false; }
 function updateStartButton() {
-  const needNames = MODES[settings.mode].names && settings.names.length < 2;
-  const oldFw = isEqMode(settings.mode) && ble.connected && ble.oldFirmware;
-  $('bStart').disabled = needNames || oldFw;
-  if (needNames) $('bStart').textContent = 'Añade al menos dos jugadores';
-  else if (oldFw) $('bStart').textContent = 'Equilibrio necesita el firmware 2 del cubo';
-  else $('bStart').textContent = 'Empezar partida';
-}
-
-// ============================== Baraja de retos ==============================
-function buildDeck() {
-  let items = [];
-  settings.packs.forEach(k => { if (PACKS[k]) items = items.concat(PACKS[k].items); });
-  items = items.concat(settings.custom);
-  items = Array.from(new Set(items));
-  if (!items.length) items = PACKS.bar.items.slice();
-  return shuffle(items);
-}
-function drawChallenge() {
-  if (!game.deck.length) game.deck = buildDeck();
-  return game.deck.pop();
-}
-function shuffle(a) {
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
+  const oldFw = ble.connected && ble.oldFirmware;
+  $('bStart').disabled = oldFw;
+  $('bStart').textContent = oldFw ? 'El cubo necesita el firmware 2' : 'Empezar partida';
 }
 
 // ============================== Navegacion ==============================
@@ -660,41 +510,65 @@ function show(view) {
 // ============================== Bluetooth ==============================
 function setBadge() {
   const b = $('badge');
-  if (ble.connected) { b.textContent = 'Cubo conectado'; b.className = 'badge on'; }
+  if (ble.reconnecting) { b.textContent = 'Reconectando...'; b.className = 'badge retry'; }
+  else if (ble.connected) { b.textContent = 'Cubo conectado'; b.className = 'badge on'; }
   else if (game) { b.textContent = 'Simulacion'; b.className = 'badge sim'; }
   else { b.textContent = 'Sin cubo'; b.className = 'badge'; }
   $('bConnect').textContent = ble.connected ? 'Desconectar cubo' : 'Conectar cubo';
 }
 
+// Abre servicio y caracteristicas de un dispositivo ya elegido (conexion inicial o reconexion)
+async function attach(device) {
+  const server = await device.gatt.connect();
+  const service = await server.getPrimaryService(SERVICE_UUID);
+  const status = await service.getCharacteristic(STATUS_UUID);
+  const cmd = await service.getCharacteristic(COMMAND_UUID);
+  await status.startNotifications();
+  status.addEventListener('characteristicvaluechanged', onStatus);
+  ble.device = device; ble.cmd = cmd; ble.connected = true; ble.reconnecting = false;
+  setBadge(); updateStartButton();
+  await sendHold();
+}
+
 async function connect() {
-  if (ble.connected) { if (ble.device && ble.device.gatt) ble.device.gatt.disconnect(); return; }
+  if (ble.connected) { ble.userDisconnect = true; if (ble.device && ble.device.gatt) ble.device.gatt.disconnect(); return; }
   try {
     const device = await navigator.bluetooth.requestDevice({
       filters: [{ services: [SERVICE_UUID] }, { namePrefix: 'GraviFail' }],
       optionalServices: [SERVICE_UUID],
     });
     device.addEventListener('gattserverdisconnected', onDisconnected);
-    const server = await device.gatt.connect();
-    const service = await server.getPrimaryService(SERVICE_UUID);
-    const status = await service.getCharacteristic(STATUS_UUID);
-    const cmd = await service.getCharacteristic(COMMAND_UUID);
-    await status.startNotifications();
-    status.addEventListener('characteristicvaluechanged', onStatus);
-    ble = { device, cmd, connected: true, oldFirmware: false, version: 0 };
-    setBadge();
-    await sendHold();
+    ble.userDisconnect = false;
+    await attach(device);
     calLog(`Conectado a ${device.name || 'cubo'}`);
   } catch (e) {
     if (e.name !== 'NotFoundError') calLog(`Error BLE: ${e.message}`);
   }
 }
-function onDisconnected() {
-  ble.connected = false; ble.cmd = null; ble.oldFirmware = false; ble.version = 0;
+
+// Al perder el enlace: reintentar con el mismo dispositivo, sin volver a abrir el selector
+async function onDisconnected() {
+  ble.connected = false; ble.cmd = null;
   cube = { face: 0, stable: 0, fault: false, progress: 0, target: 0 };
-  setBadge(); renderCube(); updateStartButton();
-  calLog('Cubo desconectado');
+  renderCube();
+  if (ble.userDisconnect || !ble.device) { ble.version = 0; ble.oldFirmware = false; setBadge(); updateStartButton(); calLog('Cubo desconectado'); return; }
+  ble.reconnecting = true; setBadge();
+  calLog('Enlace perdido, reconectando...');
+  for (let i = 1; i <= RECONNECT_TRIES && ble.reconnecting; i++) {
+    try {
+      await new Promise(r => setTimeout(r, RECONNECT_GAP_MS));
+      await attach(ble.device);
+      calLog(`Reconectado en el intento ${i}`);
+      if (game && game.waiting && game.order) sendTarget(game.face, game.order.hold * 1000, game.order.tol);  // reponer la orden en curso
+      return;
+    } catch (e) { calLog(`Reintento ${i} fallido`); }
+  }
+  ble.reconnecting = false; ble.version = 0; ble.oldFirmware = false;
+  setBadge(); updateStartButton();
+  calLog('No se pudo reconectar');
   if (game && !game.sim) { game.sim = true; $('bSimPass').hidden = false; speak('Cubo desconectado. Modo simulacion.'); }
 }
+
 async function sendCmd(bytes) {
   if (!ble.connected || !ble.cmd) return false;
   try {
@@ -704,7 +578,7 @@ async function sendCmd(bytes) {
     return true;
   } catch (e) { calLog(`Error escribiendo: ${e.message}`); return false; }
 }
-// face 1..6 o FACE_ANY. holdMs y tolPct opcionales (firmware 2); si se omiten, el cubo usa sus valores por defecto
+// face 1..6 o FACE_ANY. holdMs y tolPct opcionales; si se omiten, el cubo usa sus valores por defecto
 function sendTarget(face, holdMs, tolPct) {
   const bytes = [CMD.SET_TARGET, face];
   if (holdMs !== undefined) {
@@ -714,7 +588,7 @@ function sendTarget(face, holdMs, tolPct) {
   }
   return sendCmd(bytes);
 }
-const sendClear  = () => sendCmd([CMD.CLEAR]);
+const sendClear = () => sendCmd([CMD.CLEAR]);
 function sendHold() {
   const ms = Math.round(settings.holdS * 1000);
   return sendCmd([CMD.SET_HOLD, ms & 0xff, (ms >> 8) & 0xff]);
@@ -725,17 +599,16 @@ function onStatus(ev) {
   if (d.byteLength < 5) return;
   const v = d.byteLength >= 6 ? d.getUint8(5) : 1;
   if (v !== ble.version) {
-    ble.version = v; ble.oldFirmware = v < PROTOCOL_MIN_EQ;
-    calLog(`Firmware del cubo: protocolo ${v}${ble.oldFirmware ? ' (antiguo, sin Equilibrio)' : ''}`);
+    ble.version = v; ble.oldFirmware = v < PROTOCOL_MIN;
+    calLog(`Firmware del cubo: protocolo ${v}${ble.oldFirmware ? ' (antiguo: actualiza el firmware)' : ''}`);
     updateStartButton();
   }
   const flags = d.getUint8(1);
   const fault = (flags & 0x02) !== 0;
   if (fault && !cube.fault) calLog('El cubo no detecta su sensor: revisa el cableado del IMU');
   cube = { face: d.getUint8(0), stable: flags & 0x01, fault, progress: d.getUint8(2), target: d.getUint8(4) };
-  const event = d.getUint8(3);
   renderCube();
-  if (event === EVT_PASS) {
+  if (d.getUint8(3) === EVT_PASS) {
     calLog('PASS recibido del cubo');
     if (game && !game.sim && game.waiting) onPass();
   }
@@ -745,7 +618,6 @@ function faceLabel(f) {
   if (f === FACE_ANY) return 'Cualquiera';
   return (f >= 1 && f <= 6) ? settings.faces[f - 1].name : '-';
 }
-
 function renderCube() {
   const fname = (f) => f ? `${f} ${faceLabel(f)}` : '-';
   $('cFace').textContent = cube.fault ? 'SIN SENSOR' : fname(cube.face);
@@ -753,8 +625,6 @@ function renderCube() {
   $('cTarget').textContent = fname(cube.target);
   $('cProg').textContent = `${cube.progress}%`;
   $('holdBar').style.width = `${cube.progress}%`;
-
-  // Tarjeta AHORA
   const card = $('cardLive');
   if (cube.face >= 1 && cube.face <= 6) {
     card.className = 'card';
@@ -764,12 +634,6 @@ function renderCube() {
     card.className = 'card none';
     card.style.background = '';
     $('liveVal').textContent = cube.fault ? 'SIN SENSOR' : (game && game.sim ? 'SIM' : '?');
-  }
-  // Pista de cara opuesta
-  if (game && game.waiting && settings.hint && cube.face && OPPOSITE[cube.face] === game.face) {
-    $('hint').textContent = 'Es la opuesta: dale la vuelta';
-  } else {
-    $('hint').textContent = '';
   }
 }
 
@@ -791,7 +655,6 @@ function tone(freq, dur, type = 'square', gain = 0.25, when = 0) {
 function sfxTick(urgency) { tone(700 + 600 * urgency, 0.05, 'square', 0.15); }
 function sfxArm() { tone(880, 0.08, 'square', 0.25); tone(1320, 0.12, 'square', 0.25, 0.09); }
 function sfxSuccess() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, 'triangle', 0.3, i * 0.09)); }
-function sfxWin() { [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, 0.22, 'triangle', 0.3, i * 0.12)); }
 function sfxBoom() {
   if (!audio) return;
   const dur = 1.4;
@@ -831,103 +694,62 @@ function speakThen(text, cb, maxMs = 2500, rate = 1.05) {
   if (u) { u.onend = fire; u.onerror = fire; }
   setTimeout(fire, maxMs);
 }
-
 function flash(cls, ms) {
   document.body.classList.remove('urgent');
   document.body.classList.add(cls);
   setTimeout(() => document.body.classList.remove(cls), ms);
 }
-
 async function requestWakeLock() {
   try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch {}
 }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && game) requestWakeLock(); });
 
-// ============================== Juego ==============================
-function namedMode() { return game && MODES[game.mode].names; }
-function alivePlayers() { return game.players.filter(p => p.lives > 0); }
-
+// ============================== Partida ==============================
 function startGame() {
   ensureAudio();
   requestWakeLock();
-  const named = MODES[settings.mode].names;
   game = {
     sim: !ble.connected,
     mode: settings.mode,
-    playersLeft: settings.players,
-    players: named ? settings.names.map(n => ({ name: n, lives: settings.lives })) : [],
-    bag: [],
-    current: -1,   // indice del jugador que tiene el cubo
-    prev: -1,      // quien se lo paso
-    // Equilibrio
-    fuseMs: 0, fuseStart: 0, passes: 0, level: 1, placeDeck: [], lastPlace: '', order: null,
-    nameBag: [], lastName: '', graceTimer: null, eyes: '',
-    round: 1,
-    turn: 0,
-    limitMs: settings.t0 * 1000,
-    deck: buildDeck(),
-    lastFace: 0,
-    face: 0,
-    waiting: false,
-    turnStart: 0,
-    tickTimer: null,
-    beepTimer: null,
+    round: 1, turn: 0, passes: 0, level: 1,
+    fuseMs: 0, fuseStart: 0,
+    placeDeck: [], lastPlace: '', order: null, face: FACE_ANY, challenge: '',
+    nameBag: [], lastName: '', eyes: '',
+    lastFace: 0, waiting: false,
+    tickTimer: null, beepTimer: null, graceTimer: null,
   };
   $('bSimPass').hidden = !game.sim;
+  $('who').hidden = !(usesNames() || game.mode === 'ojos');
+  $('bSurrender').hidden = false;
   setBadge();
   show('vPlay');
   renderCube();
-  $('who').hidden = !named;
-  $('turnUI').hidden = false;
-  sendHold();   // que ningun modo herede el mantenimiento de otro
-  let intro;
-  if (game.mode === 'eliminacion') intro = `${game.playersLeft} jugadores. Quien explote, fuera.`;
-  else if (game.mode === 'ojos') { armFuse(); intro = 'Ojos y manos. Quien tiene el cubo no mira la pantalla. Quien lo paso, mira por el y grita.'; }
-  else if (isEq()) { armFuse(); intro = say('intro'); }
-  else intro = 'Modo clasico.';
-  $('bSurrender').hidden = !isEq();
-  $('who').hidden = !(named || usesNames() || settings.mode === 'ojos');
-  speak(`${game.sim ? 'Modo simulacion. ' : ''}${intro} Preparados.`);
-  setTimeout(beginTurn, 2400);
+  sendHold();
+  armFuse();
+  const rules = game.mode === 'ojos' ? PRESENTER.rulesEyes : PRESENTER.rules;
+  speak(`${game.sim ? 'Modo simulacion. ' : ''}${say('intro')} ${rules} Preparados.`);
+  setTimeout(nextTurn, 4200);
 }
-
-// Decide quien juega y, en modos con nombre, anuncia el nombre antes de la orden
-function beginTurn(chosenIdx) {
-  if (!game) return;
-  if (!namedMode()) { nextTurn(); return; }
-  let idx = chosenIdx;
-  if (idx === undefined) idx = drawFromBag();
-  game.prev = game.current;
-  game.current = idx;
-  const p = game.players[idx];
-  $('who').className = 'who transit';
-  $('whoName').textContent = p.name;
-  $('turnUI').hidden = false;
-  $('challenge').textContent = 'el cubo viaja...';
-  $('targetVal').textContent = '-';
-  $('cardTarget').style.background = '';
-  $('cardTarget').className = 'card none';
-  $('timer').textContent = '';
-  speak(`¡${p.name}!`, 1.0);
-  game.transitTimer = setTimeout(() => { $('who').className = 'who'; nextTurn(); }, TRANSIT_MS);
+function startRound() {
+  game.round++;
+  game.turn = 0; game.passes = 0; game.level = 1;
+  armFuse();
+  show('vPlay');
+  $('bSimPass').hidden = !game.sim;
+  $('bSurrender').hidden = false;
+  speak(say('newFuse'));
+  setTimeout(nextTurn, 1800);
 }
-
-function drawFromBag() {
-  const alive = game.players.map((p, i) => p.lives > 0 ? i : -1).filter(i => i >= 0);
-  game.bag = game.bag.filter(i => game.players[i].lives > 0);
-  if (!game.bag.length) game.bag = shuffle(alive.slice());
-  // Evitar repetir al mismo justo despues de rebarajar, si hay alternativa
-  if (game.bag.length > 1 && game.bag[game.bag.length - 1] === game.current) {
-    game.bag.unshift(game.bag.pop());
-  }
-  return game.bag.pop();
-}
-
-// ============================== Equilibrio ==============================
 function armFuse() {
   const lo = settings.fuseMin * 1000, hi = settings.fuseMax * 1000;
   game.fuseMs = lo + Math.random() * (hi - lo);
-  game.fuseStart = 0;   // arranca con la primera orden
+  game.fuseStart = 0;   // arranca con el primer armado
+}
+
+// ---------- mazos ----------
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
 }
 function buildPlaceDeck() {
   let items = [];
@@ -940,7 +762,8 @@ function drawPlace() {
   const lvl = game.level;
   let pool = game.placeDeck.filter(o => o.tier <= lvl);
   if (!pool.length) {
-    game.placeDeck = buildPlaceDeck().filter(o => o.t !== game.lastPlace || game.placeDeck.length === 0);
+    const full = buildPlaceDeck();
+    game.placeDeck = full.length > 1 ? full.filter(o => o.t !== game.lastPlace) : full;
     pool = game.placeDeck.filter(o => o.tier <= lvl);
     if (!pool.length) pool = game.placeDeck;
   }
@@ -958,8 +781,6 @@ function drawPenance() {
   if (!items.length) items = PENANCES.fisicas.items;
   return items[Math.floor(Math.random() * items.length)];
 }
-
-function usesNames() { return isEqMode(settings.mode) && settings.names.length >= 2 && settings.callNames !== false; }
 function drawName() {
   game.nameBag = game.nameBag.filter(n => settings.names.includes(n));
   if (!game.nameBag.length) game.nameBag = shuffle(settings.names.slice());
@@ -968,17 +789,23 @@ function drawName() {
   game.lastName = n;
   return n;
 }
+function pickFace() {
+  const avoid = new Set([game.lastFace, cube.face]);
+  let candidates = [1, 2, 3, 4, 5, 6].filter(f => !avoid.has(f));
+  if (!candidates.length) candidates = [1, 2, 3, 4, 5, 6];
+  return candidates[Math.floor(Math.random() * candidates.length)];
+}
 
-// Equilibrio: el presentador dice nombre (si hay) y orden juntos, la pantalla muestra ambos,
-// y tras GRACE_MS de gracia con la mecha pausada suena el armado: el cubo empieza a juzgar.
-function nextTurnEquilibrio() {
+// ---------- turno: anuncio, gracia, armado ----------
+function nextTurn() {
+  if (!game) return;
   game.turn++;
   const prevHands = game.lastName;
   const who = usesNames() ? drawName() : null;
-  // Ojos y Manos: los ojos son quien acaba de pasar el cubo
   let eyes = null;
   if (game.mode === 'ojos' && who) {
-    eyes = prevHands && prevHands !== who ? prevHands : (settings.names.filter(n => n !== who)[Math.floor(Math.random() * (settings.names.length - 1))] || null);
+    const others = settings.names.filter(n => n !== who);
+    eyes = prevHands && prevHands !== who ? prevHands : others[Math.floor(Math.random() * others.length)];
     game.eyes = eyes;
   }
   const base = drawPlace();
@@ -986,11 +813,10 @@ function nextTurnEquilibrio() {
   const o = { ...base, hold: base.hold + (withFace ? FACE_EXTRA_HOLD_S : 0) };
   const face = withFace ? pickFace() : FACE_ANY;
   const f = withFace ? settings.faces[face - 1] : null;
-  game.order = o;
-  game.face = face;
+  game.order = o; game.face = face;
   if (withFace) game.lastFace = face;
   game.challenge = `${o.n}: ` + (f ? `${f.name} arriba, ` : '') + `${o.t}, ${o.hold} s`;
-  game.waiting = false;       // hasta el armado no se juzga nada
+  game.waiting = false;
   const pauseAt = performance.now();
 
   if (who) {
@@ -1004,25 +830,22 @@ function nextTurnEquilibrio() {
   else   { $('cardTarget').className = 'card none'; $('cardTarget').style.background = ''; $('targetVal').textContent = 'CUALQUIERA'; }
   $('challenge').textContent = `${o.n.toUpperCase()} · ${o.t} · ${o.hold} s`;
   $('turnNo').textContent = game.turn;
-  $('limit').textContent = `nivel ${game.level}`;
-  $('playersStat').textContent = `Racha ${game.passes} (record ${getRecordMecha()})`;
+  $('levelStat').textContent = `nivel ${game.level}`;
+  $('streakStat').textContent = `Racha ${game.passes} (record ${getRecordMecha()})`;
   $('holdBar').style.width = '0%';
-  $('timeBarWrap').style.visibility = 'hidden';
   $('timer').textContent = 'PREPARA';
-  $('timer').classList.remove('urgent', 'safe', 'danger');
+  $('timer').classList.remove('safe', 'danger');
   document.body.classList.remove('urgent');
   renderCube();
 
   const rol = eyes ? `Los ojos, ${eyes}. ` : '';
   const text = `${who ? `¡${who}! ${rol}` : ''}${o.n}: ${f ? `cara ${f.name} arriba, ` : 'cubo '}${o.t}. ${o.hold} segundos.`;
-  speakThen(text, () => { game.graceTimer = setTimeout(() => armEquilibrio(pauseAt, face, o), GRACE_MS); }, 4500);
+  speakThen(text, () => { game.graceTimer = setTimeout(() => armTurn(pauseAt, face, o), GRACE_MS); }, 4500);
 }
-
-function armEquilibrio(pauseAt, face, o) {
-  if (!game || !isEq()) return;
+function armTurn(pauseAt, face, o) {
+  if (!game) return;
   const now = performance.now();
   game.waiting = true;
-  game.turnStart = now;
   if (!game.fuseStart) game.fuseStart = now;
   else game.fuseStart += now - pauseAt;   // la mecha no ha corrido durante el anuncio ni la gracia
   $('who').className = 'who';
@@ -1030,173 +853,59 @@ function armEquilibrio(pauseAt, face, o) {
   sfxArm();
   if (!game.sim) sendTarget(face, o.hold * 1000, o.tol);
   clearInterval(game.tickTimer);
-  game.tickTimer = setInterval(tickEquilibrio, 50);
-  scheduleBeepEquilibrio();
+  game.tickTimer = setInterval(tick, 50);
+  scheduleBeep();
 }
-// Cronometro de la mecha: sube, no baja. Ambar por debajo del minimo de la mecha (zona segura),
-// rojo parpadeante desde el minimo (puede explotar en cualquier momento). El final exacto no se ve.
+
+// ---------- mecha ----------
+// Cronometro que sube: ambar por debajo del minimo (no puede explotar), rojo desde el minimo. El final exacto no se ve.
 function renderFuseClock() {
   const elapsed = Math.max(0, performance.now() - game.fuseStart);
   const danger = elapsed >= settings.fuseMin * 1000;
   const t = $('timer');
-  t.textContent = (elapsed / 1000).toFixed(2);   // cronometro real: 16.45
-  t.classList.remove('urgent');
+  t.textContent = (elapsed / 1000).toFixed(2);
   t.classList.toggle('safe', !danger);
   t.classList.toggle('danger', danger);
   document.body.classList.toggle('urgent', danger);
 }
-function tickEquilibrio() {
+function tick() {
   if (!game || !game.waiting) return;
   renderFuseClock();
   if (performance.now() - game.fuseStart >= game.fuseMs) onTimeout();
 }
-function scheduleBeepEquilibrio() {
+function scheduleBeep() {
   if (!game || !game.waiting) return;
   const frac = Math.min(1, (performance.now() - game.fuseStart) / game.fuseMs);
   sfxTick(frac);
   const rest = 1 - frac;
-  game.beepTimer = setTimeout(scheduleBeepEquilibrio, 120 + 1400 * rest * rest);
+  game.beepTimer = setTimeout(scheduleBeep, 120 + 1400 * rest * rest);
 }
-
-function renderBoard() {
-  const t = $('board');
-  t.innerHTML = '';
-  game.players.forEach(p => {
-    const tr = document.createElement('tr');
-    if (p.lives <= 0) tr.className = 'out';
-    tr.innerHTML = `<td>${escapeHtml(p.name)}</td><td>${'●'.repeat(p.lives)}${'○'.repeat(Math.max(0, settings.lives - p.lives))}</td>`;
-    t.appendChild(tr);
-  });
-  $('boardWrap').hidden = false;
-}
-
-function startRound() {
-  // Siguiente ronda: se reinicia el tiempo, la baraja de retos continua
-  game.round++;
-  game.turn = 0;
-  game.limitMs = settings.t0 * 1000;
-  game.lastFace = 0;
-  show('vPlay');
-  $('bSimPass').hidden = !game.sim;
-  if (isEq()) {
-    armFuse();
-    game.passes = 0; game.level = 1;
-    $('bSurrender').hidden = false;
-    speak(say('newFuse'));
-    setTimeout(nextTurn, 1800);
-  } else if (namedMode()) {
-    speak(`Quedan ${alivePlayers().length}. Preparados.`);
-    setTimeout(() => beginTurn(), 1800);
-  } else {
-    speak(`Quedan ${game.playersLeft}. Preparados.`);
-    setTimeout(nextTurn, 1800);
-  }
-}
-
-function pickFace() {
-  const avoid = new Set([game.lastFace, cube.face]);
-  let candidates = [1, 2, 3, 4, 5, 6].filter(f => !avoid.has(f));
-  if (!candidates.length) candidates = [1, 2, 3, 4, 5, 6];
-  return candidates[Math.floor(Math.random() * candidates.length)];
-}
-
-function nextTurn() {
-  if (!game) return;
-  if (isEq()) { nextTurnEquilibrio(); return; }
-  game.turn++;
-  const face = pickFace();
-  const challenge = drawChallenge();
-  const f = settings.faces[face - 1];
-  game.lastFace = face;
-  game.face = face;
-  game.challenge = challenge;
-  game.waiting = true;
-  game.turnStart = performance.now();
-
-  // Temporizador oculto: duracion aleatoria entre 60 % y 140 % del limite actual
-  game.turnLimitMs = settings.hidden ? game.limitMs * (0.6 + Math.random() * 0.8) : game.limitMs;
-
-  $('cardTarget').className = 'card';
-  $('cardTarget').style.background = f.color;
-  $('targetVal').textContent = f.name.toUpperCase();
-  $('challenge').textContent = challenge;
-  $('turnNo').textContent = game.turn;
-  $('limit').textContent = settings.hidden ? '?' : (game.limitMs / 1000).toFixed(1);
-  if (game.mode === 'eliminacion') $('playersStat').textContent = `Quedan ${game.playersLeft}`;
-  else if (namedMode()) $('playersStat').textContent = `Vidas ${game.players[game.current].lives}`;
-  else $('playersStat').textContent = `Record ${getRecord()}`;
-  $('holdBar').style.width = '0%';
-  $('timeBarWrap').style.visibility = settings.hidden ? 'hidden' : 'visible';
-  $('timer').textContent = settings.hidden ? '??' : (game.limitMs / 1000).toFixed(1);
-  $('timer').classList.remove('urgent');
-  document.body.classList.remove('urgent');
-  renderCube();
-
-  speak(`Cara ${f.name} arriba, ${challenge}`);
-  if (!game.sim) sendTarget(face);
-
-  clearInterval(game.tickTimer);
-  game.tickTimer = setInterval(tick, 50);
-  if (!settings.hidden) scheduleBeep();
-}
-
-function tick() {
-  if (!game || !game.waiting) return;
-  const elapsed = performance.now() - game.turnStart;
-  const remaining = Math.max(0, game.turnLimitMs - elapsed);
-  if (!settings.hidden) {
-    const urgent = remaining < game.turnLimitMs * 0.3;
-    $('timer').textContent = (remaining / 1000).toFixed(1);
-    $('timer').classList.toggle('urgent', urgent);
-    document.body.classList.toggle('urgent', urgent);
-    $('timeBar').style.width = `${(remaining / game.turnLimitMs) * 100}%`;
-  }
-  if (remaining <= 0) onTimeout();
-}
-
-function scheduleBeep() {
-  if (!game || !game.waiting) return;
-  const elapsed = performance.now() - game.turnStart;
-  const frac = Math.max(0, 1 - elapsed / game.turnLimitMs);
-  sfxTick(1 - frac);
-  const interval = 90 + 760 * frac * frac;
-  game.beepTimer = setTimeout(scheduleBeep, interval);
-}
-
 function stopTurnTimers() {
   if (!game) return;
   clearInterval(game.tickTimer);
   clearTimeout(game.beepTimer);
+  clearTimeout(game.graceTimer);
   document.body.classList.remove('urgent');
   $('timer').classList.remove('danger');
 }
 
+// ---------- eventos ----------
 function onPass() {
   if (!game || !game.waiting) return;
   game.waiting = false;
   stopTurnTimers();
   sfxSuccess();
   flash('flash-ok', 500);
-  if (!isEq()) speak('¡Pasalo!', 1.2);
-  $('timeBar').style.width = '100%';
   $('holdBar').style.width = '100%';
-  $('hint').textContent = '';
-  if (game.mode === 'clasico' && game.turn > getRecord()) setRecord(game.turn);
-  if (isEq()) {
-    game.passes++;
-    game.level = Math.min(4, 1 + Math.floor(game.passes / 2));
-    const frac = (performance.now() - game.fuseStart) / game.fuseMs;
-    let key = 'passOk';
-    if (game.passes > 0 && game.passes % 3 === 0) key = 'passStreak';
-    else if (frac > 0.8) key = 'passClose';
-    // la mecha sigue corriendo mientras habla: la pausa es corta a proposito
-    speakThen(say(key), () => { if (game && !game.waiting) nextTurn(); }, 1800, 1.15);
-    return;
-  }
-  game.limitMs = Math.max(settings.tMin * 1000, game.limitMs * settings.factor);
-  setTimeout(nextTurn, 1400);
+  game.passes++;
+  game.level = Math.min(4, 1 + Math.floor(game.passes / 2));
+  const frac = (performance.now() - game.fuseStart) / game.fuseMs;
+  let key = 'passOk';
+  if (game.passes % 3 === 0) key = 'passStreak';
+  else if (frac > 0.8) key = 'passClose';
+  // la mecha sigue corriendo mientras habla: la pausa es corta a proposito
+  speakThen(say(key), () => { if (game && !game.waiting) nextTurn(); }, 1800, 1.15);
 }
-
 function onTimeout() {
   if (!game || !game.waiting) return;
   game.waiting = false;
@@ -1205,85 +914,29 @@ function onTimeout() {
   sfxBoom();
   flash('flash-bad', 900);
   $('bSimPass').hidden = true;
-  $('hint').textContent = '';
+  $('bSurrender').hidden = true;
 
-  const faltaba = isEq() ? `Faltaba: ${game.challenge}.` : `Faltaba: cara ${faceLabel(game.face)} arriba, ${game.challenge}.`;
-  $('boardWrap').hidden = true;
-
-  if (isEq()) {
-    const pen = drawPenance();
-    const isRecord = game.passes > getRecordMecha() && game.passes > 0;
-    if (isRecord) setRecordMecha(game.passes);
-    const pair = game.mode === 'ojos';
-    let who = '', quien = pair ? 'Manos y ojos cumplen' : 'Quien tiene el cubo cumple';
-    if (usesNames() && game.lastName) {
-      who = pair && game.eyes ? `${game.lastName} y ${game.eyes}, ` : `${game.lastName}, `;
-      quien = pair && game.eyes ? `<b>${escapeHtml(game.lastName)}</b> y <b>${escapeHtml(game.eyes)}</b> cumplen` : `<b>${escapeHtml(game.lastName)}</b> cumple`;
-    }
-    speak(`${say('boom')} ${who}prenda: ${pen}.${isRecord ? ' ' + say('record') : ''}`, 1.0);
-    $('overTitle').textContent = 'BOOM';
-    $('overBody').innerHTML = `${quien} la prenda:<br><b style="font-size:24px">${escapeHtml(pen)}</b><br>
-      <span class="muted">${game.passes} pases en esta mecha${isRecord ? ', <b>nuevo record del grupo</b>' : ` (record ${getRecordMecha()})`}. ${faltaba}</span>`;
-    $('bSurrender').hidden = true;
-    $('bNext').textContent = 'Siguiente ronda';
-    $('bNext').onclick = startRound;
-  } else if (namedMode()) {
-    const p = game.players[game.current];
-    p.lives--;
-    const alive = alivePlayers();
-    renderBoard();
-    if (alive.length <= 1) {
-      const winner = alive.length ? alive[0].name : p.name;
-      speak(`¡Boom! ${p.name} fuera. ¡Gana ${winner}!`, 1.0);
-      setTimeout(sfxWin, 1800);
-      $('overTitle').textContent = `GANA ${winner.toUpperCase()}`;
-      $('overBody').innerHTML = `${game.round} rondas.<br><span class="muted">${faltaba}</span>`;
-      $('bNext').textContent = 'Nueva partida';
-      $('bNext').onclick = startGame;
-      game = null;
-    } else {
-      const out = p.lives <= 0;
-      speak(out ? `¡Boom! ${p.name} queda fuera.` : `¡Boom! ${p.name} pierde una vida. Le quedan ${p.lives}.`, 1.0);
-      $('overTitle').textContent = out ? 'ELIMINADO' : 'BOOM';
-      $('overBody').innerHTML = `<b>${escapeHtml(p.name)}</b> ${out ? 'queda fuera de la partida' : `pierde una vida, le quedan ${p.lives}`}.<br><span class="muted">${faltaba}</span>`;
-      $('bNext').textContent = 'Siguiente ronda';
-      $('bNext').onclick = startRound;
-    }
-  } else if (game.mode === 'eliminacion') {
-    game.playersLeft--;
-    if (game.playersLeft <= 1) {
-      speak('¡Boom! Fuera. Queda uno. ¡Tenemos ganador!', 1.0);
-      setTimeout(sfxWin, 1600);
-      $('overTitle').textContent = 'GANADOR';
-      $('overBody').innerHTML = `Quien no tiene el cubo gana la partida.<br><span class="muted">${game.round} rondas, ${faltaba}</span>`;
-      $('bNext').textContent = 'Nueva partida';
-      $('bNext').onclick = startGame;
-      game = null;
-    } else {
-      speak(`¡Boom! Quien tiene el cubo queda fuera. Quedan ${game.playersLeft}.`, 1.0);
-      $('overTitle').textContent = 'ELIMINADO';
-      $('overBody').innerHTML = `Quien tiene el cubo sale de la partida.<br>Quedan <b>${game.playersLeft}</b> jugadores.<br><span class="muted">${faltaba}</span>`;
-      $('bNext').textContent = 'Siguiente ronda';
-      $('bNext').onclick = startRound;
-    }
-  } else {
-    const rec = getRecord();
-    const isRecord = game.turn - 1 >= rec && game.turn - 1 > 0;
-    speak('¡Boom! Se acabo el tiempo.', 1.0);
-    $('overTitle').textContent = 'BOOM';
-    $('overBody').innerHTML = `Ronda terminada en el turno <b>${game.turn}</b>.<br>
-      ${isRecord ? '<b>Nuevo record del grupo.</b>' : `Record del grupo: ${rec} turnos.`}<br><span class="muted">${faltaba}</span>`;
-    $('bNext').textContent = 'Otra ronda';
-    $('bNext').onclick = startGame;
-    game = null;
+  const pen = drawPenance();
+  const isRecord = game.passes > getRecordMecha();
+  if (isRecord && game.passes > 0) setRecordMecha(game.passes);
+  const pair = game.mode === 'ojos';
+  let who = '', quien = pair ? 'Manos y ojos cumplen' : 'Quien tiene el cubo cumple';
+  if (usesNames() && game.lastName) {
+    who = pair && game.eyes ? `${game.lastName} y ${game.eyes}, ` : `${game.lastName}, `;
+    quien = pair && game.eyes ? `<b>${escapeHtml(game.lastName)}</b> y <b>${escapeHtml(game.eyes)}</b> cumplen` : `<b>${escapeHtml(game.lastName)}</b> cumple`;
   }
+  speak(`${say('boom')} ${who}prenda: ${pen}.${isRecord && game.passes > 0 ? ' ' + say('record') : ''}`, 1.0);
+  $('overTitle').textContent = 'BOOM';
+  $('overBody').innerHTML = `${quien} la prenda:<br><b style="font-size:24px">${escapeHtml(pen)}</b><br>
+    <span class="muted">${game.passes} pases en esta mecha${isRecord && game.passes > 0 ? ', <b>nuevo record del grupo</b>' : ` (record ${getRecordMecha()})`}. Faltaba: ${escapeHtml(game.challenge)}.</span>`;
+  $('bNext').textContent = 'Siguiente ronda';
+  $('bNext').onclick = startRound;
   setBadge();
   show('vOver');
 }
-
-// Rendicion en Equilibrio: prenda inmediata, la mecha se pausa mientras se cumple, y el cubo pasa
+// Rendicion: prenda inmediata, la mecha se pausa mientras se cumple, y el cubo pasa
 function onSurrender() {
-  if (!game || !isEq() || !game.waiting) return;
+  if (!game || !game.waiting) return;
   game.waiting = false;
   stopTurnTimers();
   if (!game.sim) sendClear();
@@ -1292,17 +945,14 @@ function onSurrender() {
   $('challenge').textContent = `RENDICION · prenda: ${pen}`;
   $('holdBar').style.width = '0%';
   speak(`${say('surrender')} Prenda: ${pen}. Cuando termine, pasalo.`, 1.0);
-  const resumeMs = 6000;
   setTimeout(() => {
     if (!game) return;
-    game.fuseStart += performance.now() - pauseStart;   // la mecha no corre durante la prenda
+    game.fuseStart += performance.now() - pauseStart;
     nextTurn();
-  }, resumeMs);
+  }, 6000);
 }
-
 function abortGame() {
-  if (game) { stopTurnTimers(); clearTimeout(game.transitTimer); clearTimeout(game.graceTimer); if (!game.sim) sendClear(); }
-  $('bSurrender').hidden = true;
+  if (game) { stopTurnTimers(); if (!game.sim) sendClear(); }
   game = null;
   if (window.speechSynthesis) speechSynthesis.cancel();
   setBadge();
@@ -1326,6 +976,10 @@ function renderCalTargets() {
     b.onclick = () => { if (ble.connected) sendTarget(i + 1); else calLog('Conecta el cubo primero'); };
     wrap.appendChild(b);
   });
+  const any = document.createElement('button');
+  any.className = 'small'; any.textContent = 'Cualquier cara';
+  any.onclick = () => { if (ble.connected) sendTarget(FACE_ANY); else calLog('Conecta el cubo primero'); };
+  wrap.appendChild(any);
   const clr = document.createElement('button');
   clr.className = 'small'; clr.textContent = 'Borrar objetivo';
   clr.onclick = () => sendClear();
@@ -1334,26 +988,19 @@ function renderCalTargets() {
 
 // ============================== Utilidades ==============================
 function clamp(v, a, b) { return Math.min(b, Math.max(a, v)); }
-function escapeHtml(s) { return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
 // ============================== Arranque ==============================
 $('version').textContent = VERSION;
 if (!navigator.bluetooth) {
   const ua = navigator.userAgent;
   let msg;
-  if (!window.isSecureContext) {
-    msg = 'WebBluetooth exige un origen seguro. Abre esta web por HTTPS (GitHub Pages) o desde localhost, no por IP de la red local.';
-  } else if (/Firefox/i.test(ua)) {
-    msg = 'Firefox no implementa WebBluetooth. Usa Chrome o Edge.';
-  } else if (/iPhone|iPad/i.test(ua)) {
-    msg = 'iOS no soporta WebBluetooth en ningun navegador. Usa un movil Android.';
-  } else if (/Brave/i.test(ua) || (navigator.brave && navigator.brave.isBrave)) {
-    msg = 'Brave trae WebBluetooth desactivado. Activa brave://flags/#brave-web-bluetooth-api y reinicia el navegador.';
-  } else if (/Linux/i.test(ua) && !/Android/i.test(ua)) {
-    msg = 'Chrome en Linux trae WebBluetooth detras de un flag. Activa chrome://flags/#enable-experimental-web-platform-features, reinicia Chrome y recarga.';
-  } else {
-    msg = 'Este navegador no tiene WebBluetooth. Usa Chrome o Edge en Android o escritorio.';
-  }
+  if (!window.isSecureContext) msg = 'WebBluetooth exige un origen seguro. Abre esta web por HTTPS (GitHub Pages) o desde localhost, no por IP de la red local.';
+  else if (/Firefox/i.test(ua)) msg = 'Firefox no implementa WebBluetooth. Usa Chrome o Edge.';
+  else if (/iPhone|iPad/i.test(ua)) msg = 'iOS no soporta WebBluetooth en ningun navegador. Usa un movil Android.';
+  else if (/Brave/i.test(ua) || (navigator.brave && navigator.brave.isBrave)) msg = 'Brave trae WebBluetooth desactivado. Activa brave://flags/#brave-web-bluetooth-api y reinicia el navegador.';
+  else if (/Linux/i.test(ua) && !/Android/i.test(ua)) msg = 'Chrome en Linux trae WebBluetooth detras de un flag. Activa chrome://flags/#enable-experimental-web-platform-features, reinicia Chrome y recarga.';
+  else msg = 'Este navegador no tiene WebBluetooth. Usa Chrome o Edge en Android o escritorio.';
   $('noBle').textContent = msg;
   $('noBle').hidden = false;
   $('bConnect').disabled = true;
@@ -1365,17 +1012,17 @@ $('bSettings').onclick = () => { renderSettings(); show('vSettings'); };
 $('bCal').onclick = () => { renderCalTargets(); renderCube(); show('vCal'); };
 $('bSaveSettings').onclick = () => { readSettingsForm(); sendHold(); show('vHome'); };
 $('bResetSettings').onclick = () => { const names = settings.names; settings = JSON.parse(JSON.stringify(DEFAULTS)); settings.names = names; saveSettings(); renderSettings(); };
-$('bAddName').onclick = addName;
-$('newName').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addName(); } });
 $('bBackSettings').onclick = () => show('vHome');
 $('bRules').onclick = () => show('vRules');
 $('bBackRules').onclick = () => show('vHome');
 $('bBackRulesTop').onclick = () => show('vHome');
 $('bBackCal').onclick = () => { sendClear(); show('vHome'); };
 $('bAbort').onclick = abortGame;
-$('bSimPass').onclick = () => { if (game && game.sim) onPass(); };
 $('bSurrender').onclick = onSurrender;
+$('bSimPass').onclick = () => { if (game && game.sim) onPass(); };
 $('bHome').onclick = () => { game = null; setBadge(); show('vHome'); };
+$('bAddName').onclick = addName;
+$('newName').addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); addName(); } });
 document.addEventListener('keydown', (e) => { if (e.key === 'p' && game && game.sim) onPass(); });
 
 setBadge();
