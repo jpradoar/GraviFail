@@ -160,6 +160,10 @@
   <!-- AJUSTES -->
   <section id="vSettings" hidden>
     <div class="panel">
+      <h3>Sensibilidad del cubo</h3>
+      <div id="sensEdit"></div>
+    </div>
+    <div class="panel">
       <h3>Mecha</h3>
       <label>Mecha minima (s)<input id="sFuseMin" type="number" min="15" max="180" step="5"></label>
       <label>Mecha maxima (s)<input id="sFuseMax" type="number" min="20" max="300" step="5"></label>
@@ -232,6 +236,7 @@
 
       <h2>Ajustes</h2>
       <ul>
+        <li><b>Sensibilidad del cubo</b>: Suave perdona mas inclinacion y pide menos segundos; Estricto casi no perdona y pide mas. Es el dial de dificultad: no cambia las poses, cambia lo exigente que es el juez.</li>
         <li><b>Mecha</b>: entre que minimo y que maximo puede explotar. Por defecto de 40 a 80 segundos.</li>
         <li><b>Poses</b>: Sentado, el mazo base; Mesa y de pie, con recorridos y levantarse. Cuidado con los vasos.</li>
         <li><b>Prendas</b>: Fisicas, Sociales, y las que escriba el grupo, que suelen ser las mejores.</li>
@@ -251,7 +256,7 @@
   <!-- CALIBRACION -->
   <section id="vCal" hidden>
     <div class="cal">
-      <div class="panel"><div class="muted">Cara arriba</div><div class="v" id="cFace">-</div></div>
+      <div class="panel" id="cFaceCard"><div class="muted">Cara arriba</div><div class="v" id="cFace">-</div></div>
       <div class="panel"><div class="muted">Quieto</div><div class="v" id="cStable">-</div></div>
       <div class="panel"><div class="muted">Objetivo</div><div class="v" id="cTarget">-</div></div>
       <div class="panel"><div class="muted">Progreso</div><div class="v" id="cProg">0%</div></div>
@@ -267,7 +272,7 @@
 'use strict';
 
 // ============================== Constantes ==============================
-const VERSION = 'PoC 0.8';
+const VERSION = 'PoC 0.8.1';
 const SERVICE_UUID = 'a5c0f000-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const STATUS_UUID  = 'a5c0f001-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const COMMAND_UUID = 'a5c0f002-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
@@ -280,6 +285,17 @@ const GRACE_MS = 2000;        // gracia tras oir la orden completa, con la mecha
 const FACE_CHANCE = { 1: 0.15, 2: 0.35, 3: 0.5, 4: 0.7 };
 const FACE_EXTRA_HOLD_S = 1;
 const RECONNECT_TRIES = 4;    // reintentos de reconexion BLE antes de pasar a simulacion
+// Sensibilidad del cubo. tolDelta se suma al porcentaje de inclinacion admitida de cada pose
+// (mas alto = menos inclinacion permitida); holdMul multiplica los segundos de quietud.
+const SENSITIVITY = {
+  suave:    { name: 'Suave',    desc: 'Perdona mas inclinacion y pide menos segundos. Para empezar o con niños.', tolDelta: -6, holdMul: 0.75 },
+  normal:   { name: 'Normal',   desc: 'Los valores de cada pose tal cual.', tolDelta: 0, holdMul: 1 },
+  estricto: { name: 'Estricto', desc: 'Casi ninguna inclinacion y mas segundos. Para grupos que ya dominan.', tolDelta: 5, holdMul: 1.3 },
+};
+function applySensitivity(o) {
+  const sv = SENSITIVITY[settings.sensitivity] || SENSITIVITY.normal;
+  return { ...o, tol: clamp(o.tol + sv.tolDelta, 50, 99), hold: Math.max(1, Math.round(o.hold * sv.holdMul * 2) / 2) };
+}
 const RECONNECT_GAP_MS = 1500;
 
 const MODES = {
@@ -366,7 +382,7 @@ function say(key) { const a = PRESENTER[key]; return Array.isArray(a) ? a[Math.f
 // ---------- FIN DEL CONTENIDO EDITABLE ----------
 
 const DEFAULTS = {
-  mode: 'equilibrio', names: [], callNames: true,
+  mode: 'equilibrio', names: [], callNames: true, sensitivity: 'normal',
   fuseMin: 40, fuseMax: 80, placePacks: ['sentado'], penancePacks: ['fisicas', 'sociales'], customPenances: [],
   holdS: 2.0,
   faces: [
@@ -406,7 +422,20 @@ function saveSettings() { localStorage.setItem('gravifail.settings', JSON.string
 function getRecordMecha() { return parseInt(localStorage.getItem('gravifail.recordMecha') || '0', 10); }
 function setRecordMecha(n) { localStorage.setItem('gravifail.recordMecha', String(n)); }
 
+function renderSensitivity() {
+  const wrap = $('sensEdit');
+  wrap.innerHTML = '';
+  Object.keys(SENSITIVITY).forEach(key => {
+    const sv = SENSITIVITY[key];
+    const l = document.createElement('label');
+    l.className = 'check';
+    l.innerHTML = `<input type="radio" name="sens" value="${key}" ${settings.sensitivity === key ? 'checked' : ''}>
+                   <span><b>${sv.name}</b> <span class="muted">${sv.desc}</span></span>`;
+    wrap.appendChild(l);
+  });
+}
 function renderSettings() {
+  renderSensitivity();
   $('sFuseMin').value = settings.fuseMin;
   $('sFuseMax').value = settings.fuseMax;
   $('sCallNames').checked = settings.callNames !== false;
@@ -427,6 +456,8 @@ function readSettingsForm() {
   settings.fuseMin = clamp(parseInt($('sFuseMin').value, 10) || DEFAULTS.fuseMin, 15, 180);
   settings.fuseMax = clamp(parseInt($('sFuseMax').value, 10) || DEFAULTS.fuseMax, settings.fuseMin + 5, 300);
   settings.callNames = $('sCallNames').checked;
+  const sens = $('sensEdit').querySelector('input:checked');
+  settings.sensitivity = sens && SENSITIVITY[sens.value] ? sens.value : 'normal';
   settings.customPenances = $('sPenances').value.split('\n').map(x => x.trim()).filter(Boolean);
   settings.holdS = clamp(parseFloat($('sHold').value) || DEFAULTS.holdS, 0.5, 5);
   settings.placePacks = Array.from($('placePacksEdit').querySelectorAll('input:checked')).map(i => i.dataset.pack);
@@ -451,7 +482,8 @@ function renderPackChecks(elId, packs, selected) {
 }
 function renderHomeSummary() {
   const m = MODES[settings.mode] || MODES.equilibrio;
-  let mode = `${m.name}, mecha ${settings.fuseMin} a ${settings.fuseMax} s`;
+  const sv = SENSITIVITY[settings.sensitivity] || SENSITIVITY.normal;
+  let mode = `${m.name}, sensibilidad ${sv.name.toLowerCase()}, mecha ${settings.fuseMin} a ${settings.fuseMax} s`;
   if (usesNames()) mode += `, llama por nombre a ${settings.names.length}`;
   const packs = settings.placePacks.map(k => PLACES[k] ? PLACES[k].name : k).join(', ') || 'ninguno';
   const pens = settings.penancePacks.map(k => PENANCES[k] ? PENANCES[k].name : k).concat(settings.customPenances.length ? [`${settings.customPenances.length} propias`] : []).join(', ') || 'ninguna';
@@ -621,6 +653,9 @@ function faceLabel(f) {
 function renderCube() {
   const fname = (f) => f ? `${f} ${faceLabel(f)}` : '-';
   $('cFace').textContent = cube.fault ? 'SIN SENSOR' : fname(cube.face);
+  const cc = $('cFaceCard');
+  if (cube.face >= 1 && cube.face <= 6) { cc.style.background = settings.faces[cube.face - 1].color; cc.style.color = '#111'; }
+  else { cc.style.background = ''; cc.style.color = ''; }
   $('cStable').textContent = cube.stable ? 'si' : 'no';
   $('cTarget').textContent = fname(cube.target);
   $('cProg').textContent = `${cube.progress}%`;
@@ -808,7 +843,7 @@ function nextTurn() {
     eyes = prevHands && prevHands !== who ? prevHands : others[Math.floor(Math.random() * others.length)];
     game.eyes = eyes;
   }
-  const base = drawPlace();
+  const base = applySensitivity(drawPlace());
   const withFace = Math.random() < (FACE_CHANCE[game.level] || 0);
   const o = { ...base, hold: base.hold + (withFace ? FACE_EXTRA_HOLD_S : 0) };
   const face = withFace ? pickFace() : FACE_ANY;
