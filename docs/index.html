@@ -61,6 +61,9 @@
   .challenge { text-align: center; font-size: 28px; font-weight: 700; line-height: 1.2; min-height: 70px; }
   .timer { font-size: 84px; font-weight: 800; text-align: center; font-variant-numeric: tabular-nums; line-height: 1; }
   .timer.urgent { color: var(--bad); }
+  .timer.safe { color: var(--accent); }
+  .timer.danger { color: var(--bad); animation: blink .6s infinite alternate; }
+  @keyframes blink { from { opacity: 1; } to { opacity: .45; } }
   .bar { height: 14px; background: var(--line); border-radius: 999px; overflow: hidden; }
   .bar > div { height: 100%; width: 100%; background: var(--accent); transition: width .1s linear; }
   .bar.hold > div { background: var(--ok); width: 0; }
@@ -122,7 +125,7 @@
     <button id="bConnect" class="primary">Conectar cubo</button>
     <div class="modes" id="modes"></div>
     <div class="panel">
-      <h3>Jugadores <span class="muted" style="font-weight:400">(para Al azar)</span></h3>
+      <h3>Jugadores <span class="muted" style="font-weight:400">(opcional: Equilibrio llama por nombre)</span></h3>
       <div class="chips" id="chips"></div>
       <div class="addrow">
         <input id="newName" type="text" maxlength="14" placeholder="Nombre" autocomplete="off">
@@ -159,6 +162,7 @@
       <span>Limite <b id="limit">0</b> s</span>
     </div>
     <button id="bSimPass" class="primary" hidden>Simular PASS</button>
+    <button id="bSurrender" class="small" hidden>Me rindo</button>
     </div>
     <button id="bAbort" class="small">Abortar partida</button>
   </section>
@@ -177,7 +181,7 @@
     <div class="panel">
       <h3>Variantes (aplican a todos los modos)</h3>
       <label>Jugadores en Eliminacion<input id="sPlayers" type="number" min="2" max="12" step="1"></label>
-      <label>Vidas por jugador en Al azar<input id="sLives" type="number" min="1" max="5" step="1"></label>
+      <label class="check"><input id="sCallNames" type="checkbox"> Llamar por nombre en Equilibrio cuando hay jugadores cargados</label>
       <label>Mecha de Equilibrio, minimo (s)<input id="sFuseMin" type="number" min="15" max="180" step="5"></label>
       <label>Mecha de Equilibrio, maximo (s)<input id="sFuseMax" type="number" min="20" max="300" step="5"></label>
       <label class="check"><input id="sHidden" type="checkbox"> Temporizador oculto: sin pitidos ni cuenta atras, explota cuando quiere</label>
@@ -233,47 +237,42 @@
       <p>Con cada PASS el tiempo del siguiente turno se acorta. Cuando la pantalla parpadea en rojo, queda menos de un tercio.</p>
       <div class="tip">Si mueves el cubo deprisa, la pantalla no muestra ninguna cara. El cubo solo lee la cara cuando se mueve despacio. Es asi a proposito.</div>
 
-      <h2>Clasico</h2>
-      <p class="req">Sin nombres. De 2 a 8 jugadores.</p>
-      <ul>
-        <li>El cubo va en circulo, siempre hacia el mismo lado. Se decide al empezar.</li>
-        <li>Cada BOOM termina la ronda. La pantalla dice en que turno ha explotado.</li>
-        <li>El objetivo del grupo es batir su <b>record</b> de turnos encadenados. Se guarda en el movil.</li>
-      </ul>
-
       <h2>Eliminacion</h2>
       <p class="req">Sin nombres. En Ajustes se indica cuantos jugadores hay.</p>
       <ul>
-        <li>El cubo va en circulo, como en Clasico.</li>
+        <li>El cubo va en circulo. Cada turno pide una cara concreta arriba y un reto; sin gracia ni mecha compartida: es el diseño original, que se conserva como referencia.</li>
         <li>Quien tiene el cubo al explotar <b>queda fuera</b> y sale del circulo.</li>
         <li>La siguiente ronda empieza con el tiempo inicial completo, para los que quedan.</li>
         <li>Gana quien queda cuando todos los demas han explotado.</li>
       </ul>
 
-      <h2>Al azar</h2>
-      <p class="req">Con nombres. Añadelos en la pantalla de inicio. Cada jugador tiene las vidas que marque Ajustes, tres por defecto.</p>
-      <ul>
-        <li>El movil <b>dice un nombre</b>. Quien tiene el cubo se lo lleva a esa persona, aunque este al otro lado de la mesa. Puede desordenarlo por el camino.</li>
-        <li>Dos segundos despues llega la orden y arranca el tiempo, <b>haya llegado el cubo o no</b>. Pasar rapido es parte del juego.</li>
-        <li>Los nombres salen de una bolsa: nadie repite hasta que todos han jugado. Luego se rebaraja. Nunca sabes cuando te toca.</li>
-        <li>Cada BOOM quita <b>una vida</b> a quien tiene el cubo. Sin vidas, fuera de la bolsa.</li>
-        <li>Gana el ultimo con vidas. El marcador se ve entre rondas.</li>
-      </ul>
-
       <h2>Equilibrio</h2>
-      <p class="req">Sin nombres. De 3 a 6 jugadores, sentados. Necesita el firmware 2 del cubo; la web avisa si no lo tiene.</p>
+      <p class="req">De 3 a 6 jugadores, sentados. Nombres opcionales. Necesita el firmware 2 del cubo; la web avisa si no lo tiene.</p>
       <ul>
-        <li>El cubo va en circulo. La orden es un <b>lugar del cuerpo</b> y un <b>tiempo</b>: "en el dorso de la mano, tres segundos". A veces tambien una cara: "azul arriba, sobre la cabeza, cuatro segundos".</li>
+        <li>Cada orden es una <b>pose con nombre</b>: "¡El Camarero! Cubo en el dorso de la mano, tres segundos". A veces exige ademas una cara: "El Faraon, cara azul arriba, cuatro segundos".</li>
+        <li>El cubo va en circulo. Si hay jugadores cargados, el presentador <b>dice el nombre y la orden juntos</b>. Despues hay <b>dos segundos de gracia</b> con la mecha parada para que el cubo llegue y te prepares. Suena un aviso: desde ahi el cubo juzga y la mecha corre.</li>
         <li>Coloca el cubo donde se pide y <b>no lo sujetes</b>. El grupo vigila eso. El cubo vigila lo demas: si se inclina o se mueve, la barra verde vuelve a cero y empiezas a contar otra vez.</li>
         <li>Cuando la barra verde se llena, PASS. Pasa el cubo al siguiente.</li>
-        <li><b>La mecha es compartida</b>: un unico tiempo para toda la ronda, oculto, que no se reinicia al pasar. Cada segundo que tardas en pasar lo quemas tu. Los pitidos se aceleran cuando queda poco.</li>
+        <li><b>La mecha es compartida</b>: un unico tiempo para toda la ronda, que no se reinicia al pasar. Cada segundo que tardas en pasar lo quemas tu. El reloj <b>cuenta hacia arriba</b>: en ambar mientras la mecha aun no puede explotar, en rojo parpadeante cuando ya puede hacerlo en cualquier momento. Nadie sabe el segundo exacto. Los pitidos se aceleran cuando queda poco.</li>
         <li>Cuando explota, quien tiene el cubo <b>cumple una prenda</b> que dicta el movil. Despues, nueva ronda con mecha nueva.</li>
         <li>Con cada pase los lugares se ponen mas dificiles: palma, rodilla, dorso de la mano, antebrazo, hombro, cabeza, dos dedos.</li>
         <li>Si el cubo se cae, lo recoges y sigues. El tiempo no se para.</li>
+        <li><b>Racha del grupo</b>: los pases seguidos en una misma mecha son el record de la mesa. Se anuncia al explotar.</li>
+        <li><b>Rendicion</b>: si no puedes o no quieres, boton "Me rindo". Prenda inmediata, la mecha se detiene mientras la cumples, y el cubo pasa.</li>
+      </ul>
+
+      <h2>Ojos y Manos</h2>
+      <p class="req">Igual que Equilibrio, con dos roles por turno. De 2 a 6 jugadores. Con dos, se alternan.</p>
+      <ul>
+        <li>Quien tiene el cubo son <b>las manos</b>: coloca, aguanta y <b>no mira la pantalla</b>. El grupo vigila que no mire, igual que vigila la postura.</li>
+        <li>Quien acaba de pasar el cubo son <b>los ojos</b>: mira la pantalla, ve que cara detecta el cubo y como se llena la barra verde, y le grita a las manos lo que tiene que hacer: "girala, esa no, quieto, aguanta, ya, pasalo".</li>
+        <li>El presentador dice los dos nombres si hay jugadores cargados: "El cubo para Ana. Los ojos, Bruno." Sin nombres, la regla es fija: quien lo paso, a la pantalla.</li>
+        <li>Si explota, la <b>prenda es para los dos</b>: manos y ojos.</li>
+        <li>Todo lo demas es Equilibrio: mecha compartida, gracia, poses, racha y rendicion.</li>
       </ul>
 
       <h2>Variantes</h2>
-      <p>Se activan en Ajustes y valen para cualquier modo.</p>
+      <p>Se activan en Ajustes.</p>
       <ul>
         <li><b>Temporizador oculto.</b> Sin pitidos ni cuenta atras. La bomba explota cuando quiere, un poco antes o un poco despues del tiempo normal. Solo se ve la barra verde del PASS.</li>
         <li><b>Pista de cara opuesta.</b> Si la cara que buscas es justo la opuesta a la que tienes arriba, la pantalla te lo dice. Para grupos que empiezan o para niños.</li>
@@ -311,7 +310,7 @@
 'use strict';
 
 // ============================== Constantes ==============================
-const VERSION = 'PoC 0.5.2';
+const VERSION = 'PoC 0.7';
 const SERVICE_UUID = 'a5c0f000-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const STATUS_UUID  = 'a5c0f001-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const COMMAND_UUID = 'a5c0f002-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
@@ -324,14 +323,16 @@ const FACE_EXTRA_HOLD_S = 1;
 const PROTOCOL_MIN_EQ = 2;    // version minima de firmware para Equilibrio
 const EVT_PASS = 0x01;
 const OPPOSITE = { 1: 2, 2: 1, 3: 4, 4: 3, 5: 6, 6: 5 };
-const TRANSIT_MS = 2200;   // desde que se dice el nombre hasta que se dicta la orden
+const TRANSIT_MS = 2200;   // modos con nombre antiguos: desde el nombre hasta la orden
+const GRACE_MS = 2000;     // Equilibrio: gracia tras oir la orden completa, con la mecha pausada, antes de que el cubo juzgue
 
 const MODES = {
-  clasico:     { name: 'Clasico',     names: false, desc: 'El cubo va en circulo. Cada BOOM termina la ronda. Se guarda el record de turnos.' },
-  eliminacion: { name: 'Eliminacion', names: false, desc: 'Quien tiene el cubo al explotar queda fuera. Gana quien queda. Sin nombres, solo un conteo.' },
-  azar:        { name: 'Al azar',     names: true,  desc: 'La app dice un nombre, el cubo viaja hasta esa persona y entonces llega la orden. Vidas por jugador.' },
   equilibrio:  { name: 'Equilibrio',  names: false, desc: 'Coloca el cubo en la cabeza, el dorso de la mano, el antebrazo... y aguanta quieto. Mecha compartida: el tiempo no se reinicia al pasar. Quien explota, prenda.' },
+  ojos:        { name: 'Ojos y Manos', names: false, desc: 'Como Equilibrio, pero quien tiene el cubo no mira la pantalla. Quien acaba de pasarlo mira por el y le grita: girala, quieto, aguanta, ya. Si explota, prenda para los dos.' },
+  eliminacion: { name: 'Eliminacion', names: false, desc: 'Quien tiene el cubo al explotar queda fuera. Gana quien queda. Sin nombres, solo un conteo.' },
 };
+function isEqMode(m) { return m === 'equilibrio' || m === 'ojos'; }
+function isEq() { return !!game && isEqMode(game.mode); }
 
 // Lugares de Equilibrio. tier 1 facil .. 4 dificil. hold en segundos. tol: 85 normal, 90 estricto, 95 muy estricto.
 // La cara se añade como modificador aleatorio segun el nivel (FACE_CHANCE), no va fija en el lugar.
@@ -339,41 +340,53 @@ const PLACES = {
   sentado: {
     name: 'Sentado', desc: 'Se juega sin levantarse. Es el mazo base.',
     items: [
-      { t: 'en la palma de la mano', tier: 1, hold: 2, tol: 85 },
-      { t: 'sobre la rodilla', tier: 1, hold: 2, tol: 85 },
-      { t: 'en la palma, con el brazo estirado', tier: 1, hold: 3, tol: 88 },
-      { t: 'sobre el hombro, sin manos', tier: 1, hold: 3, tol: 85 },
-      { t: 'en el dorso de la mano', tier: 2, hold: 3, tol: 90 },
-      { t: 'sobre el antebrazo', tier: 2, hold: 3, tol: 88 },
-      { t: 'en el hombro', tier: 2, hold: 3, tol: 85 },
-      { t: 'sobre la cabeza', tier: 2, hold: 3, tol: 85 },
-      { t: 'en el dorso de la mano, brazo estirado', tier: 2, hold: 3, tol: 92 },
-      { t: 'sobre dos dedos', tier: 3, hold: 3, tol: 90 },
-      { t: 'en el dorso de la mano, con los ojos cerrados', tier: 3, hold: 4, tol: 90 },
-      { t: 'sobre la cabeza, mientras aplaudes', tier: 3, hold: 3, tol: 85 },
-      { t: 'en el antebrazo, mirando al techo', tier: 3, hold: 4, tol: 90 },
-      { t: 'en el codo, con el brazo doblado', tier: 3, hold: 3, tol: 88 },
-      { t: 'en la punta de los dedos', tier: 4, hold: 3, tol: 95 },
-      { t: 'sobre la cabeza, con los ojos cerrados', tier: 4, hold: 5, tol: 88 },
-      { t: 'en el dorso de la mano, brazo estirado', tier: 4, hold: 5, tol: 94 },
-      { t: 'sobre el pie, sentado', tier: 4, hold: 4, tol: 88 },
-      { t: 'en el hombro, girando la cabeza a los lados', tier: 4, hold: 4, tol: 88 },
+      { n: 'La Bandeja',            t: 'en la palma de la mano', tier: 1, hold: 2, tol: 85 },
+      { n: 'El Regazo',             t: 'sobre la rodilla', tier: 1, hold: 2, tol: 85 },
+      { n: 'La Estatua',            t: 'en la palma, con el brazo estirado', tier: 1, hold: 3, tol: 88 },
+      { n: 'El Camarero',           t: 'en el dorso de la mano', tier: 2, hold: 3, tol: 90 },
+      { n: 'El Mayordomo',          t: 'sobre el antebrazo', tier: 2, hold: 3, tol: 88 },
+      { n: 'El Loro',               t: 'en el hombro', tier: 2, hold: 3, tol: 85 },
+      { n: 'El Faraon',             t: 'sobre la cabeza', tier: 2, hold: 3, tol: 85 },
+      { n: 'El Camarero Estirado',  t: 'en el dorso de la mano, brazo estirado', tier: 2, hold: 3, tol: 92 },
+      { n: 'El Sastre',             t: 'sobre dos dedos', tier: 3, hold: 3, tol: 90 },
+      { n: 'El Camarero Ciego',     t: 'en el dorso de la mano, con los ojos cerrados', tier: 3, hold: 4, tol: 90 },
+      { n: 'El Aplauso Real',       t: 'sobre la cabeza, mientras aplaudes', tier: 3, hold: 3, tol: 85 },
+      { n: 'El Astronomo',          t: 'en el antebrazo, mirando al techo', tier: 3, hold: 4, tol: 90 },
+      { n: 'El Violinista',         t: 'en el codo, con el brazo doblado', tier: 3, hold: 3, tol: 88 },
+      { n: 'El Equilibrista',       t: 'en la punta de los dedos', tier: 4, hold: 3, tol: 95 },
+      { n: 'El Faraon Ciego',       t: 'sobre la cabeza, con los ojos cerrados', tier: 4, hold: 5, tol: 88 },
+      { n: 'El Camarero Supremo',   t: 'en el dorso de la mano, brazo estirado', tier: 4, hold: 5, tol: 94 },
+      { n: 'El Zapatero',           t: 'sobre el pie, sentado', tier: 4, hold: 4, tol: 88 },
+      { n: 'El Vigilante',          t: 'en el hombro, girando la cabeza a los lados', tier: 4, hold: 4, tol: 88 },
     ],
   },
   mesa: {
     name: 'Mesa y de pie', desc: 'Recorridos y levantarse. Cuidado con los vasos.',
     items: [
-      { t: 'llevalo de una punta de la mesa a la otra en el dorso de la mano', tier: 2, hold: 6, tol: 92 },
-      { t: 'muevelo ocho dedos a la izquierda sin que se incline', tier: 2, hold: 4, tol: 95 },
-      { t: 'en la palma, levantate y vuelve a sentarte', tier: 2, hold: 5, tol: 88 },
-      { t: 'da una vuelta a tu silla con el cubo en la palma', tier: 3, hold: 6, tol: 90 },
-      { t: 'sobre la cabeza, de pie, dos pasos y vuelve', tier: 3, hold: 5, tol: 88 },
-      { t: 'en el dorso de la mano, cambia de silla con quien tengas enfrente', tier: 3, hold: 6, tol: 90 },
-      { t: 'en el antebrazo, ve a tocar la pared y vuelve', tier: 4, hold: 8, tol: 90 },
-      { t: 'llevalo de una punta de la mesa a la otra en la punta de los dedos', tier: 4, hold: 6, tol: 95 },
+      { n: 'El Servicio de Mesa',   t: 'llevalo de una punta de la mesa a la otra en el dorso de la mano', tier: 2, hold: 6, tol: 92 },
+      { n: 'El Relojero',           t: 'muevelo ocho dedos a la izquierda sin que se incline', tier: 2, hold: 4, tol: 95 },
+      { n: 'La Reverencia',         t: 'en la palma, levantate y vuelve a sentarte', tier: 2, hold: 5, tol: 88 },
+      { n: 'La Procesion',          t: 'da una vuelta a tu silla con el cubo en la palma', tier: 3, hold: 6, tol: 90 },
+      { n: 'El Faraon Peregrino',   t: 'sobre la cabeza, de pie, dos pasos y vuelve', tier: 3, hold: 5, tol: 88 },
+      { n: 'El Cambio de Guardia',  t: 'en el dorso de la mano, cambia de silla con quien tengas enfrente', tier: 3, hold: 6, tol: 90 },
+      { n: 'El Mensajero',          t: 'en el antebrazo, ve a tocar la pared y vuelve', tier: 4, hold: 8, tol: 90 },
+      { n: 'El Funambulista',       t: 'llevalo de una punta de la mesa a la otra en la punta de los dedos', tier: 4, hold: 6, tol: 95 },
     ],
   },
 };
+
+// Frases del presentador. Cortas: nunca retrasan la orden mas de un par de segundos.
+const PRESENTER = {
+  intro: ['Bienvenidos a GraviFail. El cubo no perdona un temblor.', 'Silencio en la sala. El cubo juzga.', 'Manos firmes. La mecha es de todos.'],
+  passOk: ['¡Pasalo!', '¡Limpio! Pasalo.', 'Aceptado. ¡Pasalo!', 'Ni un temblor. ¡Pasalo!'],
+  passClose: ['¡Por los pelos! Pasalo ya.', 'Eso ha sido justo. ¡Pasalo!', 'Casi te lo comes. ¡Pasalo!'],
+  passStreak: ['Tres seguidos. El cubo empieza a respetaros.', 'Que racha. No os acostumbreis.', 'Impresionante. Ahora lo dificil.'],
+  boom: ['¡Boom! Ahi se quedo.', '¡Boom! El cubo ha hablado.', '¡Boom! Que temblor tan feo.', '¡Boom! Lo tenias y lo sabias.'],
+  record: ['Record del grupo. Enmarcadlo.', 'Nuevo record. Casi parece que sabeis jugar.'],
+  surrender: ['Rendicion aceptada. Hay prenda igual.', 'Te rindes. El cubo no olvida.'],
+  newFuse: ['Mecha nueva. Nadie sabe cuando.', 'Otra mecha. Respirad ahora que podeis.', 'Mecha encendida. Suerte.'],
+};
+function say(key) { const a = PRESENTER[key]; return a[Math.floor(Math.random() * a.length)]; }
 
 const PENANCES = {
   fisicas: {
@@ -443,7 +456,7 @@ const PACKS = {
 };
 
 const DEFAULTS = {
-  mode: 'clasico', players: 4, lives: 3, names: [], hidden: false, hint: false,
+  mode: 'equilibrio', players: 4, lives: 3, names: [], callNames: true, hidden: false, hint: false,
   fuseMin: 40, fuseMax: 80, placePacks: ['sentado'], penancePacks: ['fisicas', 'sociales'], customPenances: [],
   t0: 15, tMin: 4, factor: 0.9, holdS: 2.0,
   packs: ['bar'],
@@ -478,16 +491,20 @@ function loadSettings() {
     delete s.challenges; // formato de la version 0.1
     if (s.mode === 'libre') s.mode = 'clasico'; // version 0.2
     if (s.mode === 'victima') s.mode = 'clasico'; // version 0.5: Victima eliminado
+    if (s.mode === 'azar') s.mode = 'equilibrio';  // version 0.6: Al azar se pliega en Equilibrio
+    if (s.mode === 'clasico') s.mode = 'equilibrio'; // version 0.7: Clasico retirado
     return Object.assign(base, s);
   } catch { return base; }
 }
 function saveSettings() { localStorage.setItem('gravifail.settings', JSON.stringify(settings)); }
 function getRecord() { return parseInt(localStorage.getItem('gravifail.record') || localStorage.getItem('artefacto.record') || '0', 10); }
+function getRecordMecha() { return parseInt(localStorage.getItem('gravifail.recordMecha') || '0', 10); }
+function setRecordMecha(n) { localStorage.setItem('gravifail.recordMecha', String(n)); }
 function setRecord(n) { localStorage.setItem('gravifail.record', String(n)); }
 
 function renderSettings() {
   $('sPlayers').value = settings.players;
-  $('sLives').value = settings.lives;
+  $('sCallNames').checked = settings.callNames !== false;
   $('sFuseMin').value = settings.fuseMin;
   $('sFuseMax').value = settings.fuseMax;
   $('sPenances').value = settings.customPenances.join('\n');
@@ -521,7 +538,7 @@ function renderSettings() {
 }
 function readSettingsForm() {
   settings.players = clamp(parseInt($('sPlayers').value, 10) || DEFAULTS.players, 2, 12);
-  settings.lives = clamp(parseInt($('sLives').value, 10) || DEFAULTS.lives, 1, 5);
+  settings.callNames = $('sCallNames').checked;
   settings.fuseMin = clamp(parseInt($('sFuseMin').value, 10) || DEFAULTS.fuseMin, 15, 180);
   settings.fuseMax = clamp(parseInt($('sFuseMax').value, 10) || DEFAULTS.fuseMax, settings.fuseMin + 5, 300);
   settings.customPenances = $('sPenances').value.split('\n').map(x => x.trim()).filter(Boolean);
@@ -557,16 +574,19 @@ function renderPackChecks(elId, packs, selected, kind) {
 function renderHomeSummary() {
   const packs = settings.packs.map(k => PACKS[k] ? PACKS[k].name : k);
   if (settings.custom.length) packs.push(`${settings.custom.length} propios`);
-  const m = MODES[settings.mode] || MODES.clasico;
+  const m = MODES[settings.mode] || MODES.equilibrio;
   let mode = m.name;
   if (settings.mode === 'eliminacion') mode += `, ${settings.players} jugadores`;
   if (m.names) mode += `, ${settings.names.length} jugadores, ${settings.lives} vidas`;
-  if (settings.mode === 'equilibrio') mode += `, mecha ${settings.fuseMin} a ${settings.fuseMax} s`;
+  if (isEqMode(settings.mode)) {
+    mode += `, mecha ${settings.fuseMin} a ${settings.fuseMax} s`;
+    if (settings.names.length >= 2 && settings.callNames !== false) mode += `, llama por nombre a ${settings.names.length}`;
+  }
   const extras = [settings.hidden ? 'temporizador oculto' : '', settings.hint ? 'pista de opuesta' : ''].filter(Boolean).join(', ');
   $('homeSummary').innerHTML = `<b>${mode}</b>${extras ? ', ' + extras : ''}<br>
     Retos: ${packs.join(', ') || 'ninguno'}<br>
     Primer turno ${settings.t0} s, minimo ${settings.tMin} s, quieto ${settings.holdS} s<br>
-    Record del grupo en Clasico: <b>${getRecord()}</b> turnos`;
+    Racha record del grupo: <b>${getRecordMecha()}</b> pases en una mecha`;
 }
 
 // ============================== Modos y jugadores ==============================
@@ -585,7 +605,7 @@ function renderModes() {
 function renderChips() {
   const wrap = $('chips');
   wrap.innerHTML = '';
-  if (!settings.names.length) wrap.innerHTML = '<span class="muted">Sin jugadores. Añade al menos dos para Al azar.</span>';
+  if (!settings.names.length) wrap.innerHTML = '<span class="muted">Sin jugadores: el cubo va en circulo. Con dos o mas, el presentador llama por nombre.</span>';
   settings.names.forEach((n, i) => {
     const c = document.createElement('span');
     c.className = 'chip';
@@ -605,7 +625,7 @@ function addName() {
 }
 function updateStartButton() {
   const needNames = MODES[settings.mode].names && settings.names.length < 2;
-  const oldFw = settings.mode === 'equilibrio' && ble.connected && ble.oldFirmware;
+  const oldFw = isEqMode(settings.mode) && ble.connected && ble.oldFirmware;
   $('bStart').disabled = needNames || oldFw;
   if (needNames) $('bStart').textContent = 'Añade al menos dos jugadores';
   else if (oldFw) $('bStart').textContent = 'Equilibrio necesita el firmware 2 del cubo';
@@ -769,6 +789,7 @@ function tone(freq, dur, type = 'square', gain = 0.25, when = 0) {
   o.start(t); o.stop(t + dur + 0.02);
 }
 function sfxTick(urgency) { tone(700 + 600 * urgency, 0.05, 'square', 0.15); }
+function sfxArm() { tone(880, 0.08, 'square', 0.25); tone(1320, 0.12, 'square', 0.25, 0.09); }
 function sfxSuccess() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.18, 'triangle', 0.3, i * 0.09)); }
 function sfxWin() { [523, 659, 784, 1047, 784, 1047, 1319].forEach((f, i) => tone(f, 0.22, 'triangle', 0.3, i * 0.12)); }
 function sfxBoom() {
@@ -794,12 +815,21 @@ function pickVoice() {
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 function speak(text, rate = 1.05) {
-  if (!('speechSynthesis' in window)) return;
+  if (!('speechSynthesis' in window)) return null;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'es-ES'; u.rate = rate; u.pitch = 1;
   if (spanishVoice) u.voice = spanishVoice;
   speechSynthesis.speak(u);
+  return u;
+}
+// Habla y llama a cb cuando termina, o al cumplirse maxMs si el navegador no avisa
+function speakThen(text, cb, maxMs = 2500, rate = 1.05) {
+  let done = false;
+  const fire = () => { if (done) return; done = true; cb(); };
+  const u = speak(text, rate);
+  if (u) { u.onend = fire; u.onerror = fire; }
+  setTimeout(fire, maxMs);
 }
 
 function flash(cls, ms) {
@@ -831,6 +861,7 @@ function startGame() {
     prev: -1,      // quien se lo paso
     // Equilibrio
     fuseMs: 0, fuseStart: 0, passes: 0, level: 1, placeDeck: [], lastPlace: '', order: null,
+    nameBag: [], lastName: '', graceTimer: null, eyes: '',
     round: 1,
     turn: 0,
     limitMs: settings.t0 * 1000,
@@ -851,9 +882,11 @@ function startGame() {
   sendHold();   // que ningun modo herede el mantenimiento de otro
   let intro;
   if (game.mode === 'eliminacion') intro = `${game.playersLeft} jugadores. Quien explote, fuera.`;
-  else if (game.mode === 'azar') intro = `${game.players.length} jugadores, ${settings.lives} vidas. Atentos al nombre.`;
-  else if (game.mode === 'equilibrio') { armFuse(); intro = 'Equilibrio. Coloca el cubo donde diga y no lo sujetes. La mecha es de todos.'; }
+  else if (game.mode === 'ojos') { armFuse(); intro = 'Ojos y manos. Quien tiene el cubo no mira la pantalla. Quien lo paso, mira por el y grita.'; }
+  else if (isEq()) { armFuse(); intro = say('intro'); }
   else intro = 'Modo clasico.';
+  $('bSurrender').hidden = !isEq();
+  $('who').hidden = !(named || usesNames() || settings.mode === 'ojos');
   speak(`${game.sim ? 'Modo simulacion. ' : ''}${intro} Preparados.`);
   setTimeout(beginTurn, 2400);
 }
@@ -902,14 +935,19 @@ function buildPlaceDeck() {
   if (!items.length) items = PLACES.sentado.items.slice();
   return items;
 }
+// Sin reposicion: un lugar no vuelve a salir hasta que se agotan los de su nivel o inferior
 function drawPlace() {
-  if (!game.placeDeck.length) game.placeDeck = buildPlaceDeck();
   const lvl = game.level;
-  let pool = game.placeDeck.filter(o => o.tier <= lvl && o.t !== game.lastPlace);
+  let pool = game.placeDeck.filter(o => o.tier <= lvl);
+  if (!pool.length) {
+    game.placeDeck = buildPlaceDeck().filter(o => o.t !== game.lastPlace || game.placeDeck.length === 0);
+    pool = game.placeDeck.filter(o => o.tier <= lvl);
+    if (!pool.length) pool = game.placeDeck;
+  }
   const top = pool.filter(o => o.tier === lvl);
   if (top.length && Math.random() < 0.6) pool = top;
-  if (!pool.length) pool = game.placeDeck;
   const o = pool[Math.floor(Math.random() * pool.length)];
+  game.placeDeck = game.placeDeck.filter(x => x !== o);
   game.lastPlace = o.t;
   return o;
 }
@@ -921,8 +959,28 @@ function drawPenance() {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+function usesNames() { return isEqMode(settings.mode) && settings.names.length >= 2 && settings.callNames !== false; }
+function drawName() {
+  game.nameBag = game.nameBag.filter(n => settings.names.includes(n));
+  if (!game.nameBag.length) game.nameBag = shuffle(settings.names.slice());
+  if (game.nameBag.length > 1 && game.nameBag[game.nameBag.length - 1] === game.lastName) game.nameBag.unshift(game.nameBag.pop());
+  const n = game.nameBag.pop();
+  game.lastName = n;
+  return n;
+}
+
+// Equilibrio: el presentador dice nombre (si hay) y orden juntos, la pantalla muestra ambos,
+// y tras GRACE_MS de gracia con la mecha pausada suena el armado: el cubo empieza a juzgar.
 function nextTurnEquilibrio() {
   game.turn++;
+  const prevHands = game.lastName;
+  const who = usesNames() ? drawName() : null;
+  // Ojos y Manos: los ojos son quien acaba de pasar el cubo
+  let eyes = null;
+  if (game.mode === 'ojos' && who) {
+    eyes = prevHands && prevHands !== who ? prevHands : (settings.names.filter(n => n !== who)[Math.floor(Math.random() * (settings.names.length - 1))] || null);
+    game.eyes = eyes;
+  }
   const base = drawPlace();
   const withFace = Math.random() < (FACE_CHANCE[game.level] || 0);
   const o = { ...base, hold: base.hold + (withFace ? FACE_EXTRA_HOLD_S : 0) };
@@ -931,39 +989,66 @@ function nextTurnEquilibrio() {
   game.order = o;
   game.face = face;
   if (withFace) game.lastFace = face;
-  game.challenge = (f ? `${f.name} arriba, ` : '') + `${o.t}, ${o.hold} s`;
-  game.waiting = true;
-  game.turnStart = performance.now();
-  if (!game.fuseStart) game.fuseStart = game.turnStart;
+  game.challenge = `${o.n}: ` + (f ? `${f.name} arriba, ` : '') + `${o.t}, ${o.hold} s`;
+  game.waiting = false;       // hasta el armado no se juzga nada
+  const pauseAt = performance.now();
 
+  if (who) {
+    $('who').hidden = false; $('who').className = 'who transit';
+    $('whoName').textContent = eyes ? `${who}  ·  ojos: ${eyes}` : who;
+  } else if (game.mode === 'ojos') {
+    $('who').hidden = false; $('who').className = 'who';
+    $('whoName').textContent = 'manos: no mires  ·  ojos: quien lo paso';
+  }
   if (f) { $('cardTarget').className = 'card'; $('cardTarget').style.background = f.color; $('targetVal').textContent = f.name.toUpperCase(); }
   else   { $('cardTarget').className = 'card none'; $('cardTarget').style.background = ''; $('targetVal').textContent = 'CUALQUIERA'; }
-  $('challenge').textContent = `${o.t} · ${o.hold} s`;
+  $('challenge').textContent = `${o.n.toUpperCase()} · ${o.t} · ${o.hold} s`;
   $('turnNo').textContent = game.turn;
   $('limit').textContent = `nivel ${game.level}`;
-  $('playersStat').textContent = 'Mecha compartida';
+  $('playersStat').textContent = `Racha ${game.passes} (record ${getRecordMecha()})`;
   $('holdBar').style.width = '0%';
   $('timeBarWrap').style.visibility = 'hidden';
-  $('timer').textContent = 'MECHA';
-  $('timer').classList.remove('urgent');
+  $('timer').textContent = 'PREPARA';
+  $('timer').classList.remove('urgent', 'safe', 'danger');
   document.body.classList.remove('urgent');
   renderCube();
 
-  speak(`${f ? `Cara ${f.name} arriba, ` : ''}${o.t}, ${o.hold} segundos`);
-  if (!game.sim) sendTarget(face, o.hold * 1000, o.tol);
+  const rol = eyes ? `Los ojos, ${eyes}. ` : '';
+  const text = `${who ? `¡${who}! ${rol}` : ''}${o.n}: ${f ? `cara ${f.name} arriba, ` : 'cubo '}${o.t}. ${o.hold} segundos.`;
+  speakThen(text, () => { game.graceTimer = setTimeout(() => armEquilibrio(pauseAt, face, o), GRACE_MS); }, 4500);
+}
 
+function armEquilibrio(pauseAt, face, o) {
+  if (!game || !isEq()) return;
+  const now = performance.now();
+  game.waiting = true;
+  game.turnStart = now;
+  if (!game.fuseStart) game.fuseStart = now;
+  else game.fuseStart += now - pauseAt;   // la mecha no ha corrido durante el anuncio ni la gracia
+  $('who').className = 'who';
+  renderFuseClock();
+  sfxArm();
+  if (!game.sim) sendTarget(face, o.hold * 1000, o.tol);
   clearInterval(game.tickTimer);
   game.tickTimer = setInterval(tickEquilibrio, 50);
   scheduleBeepEquilibrio();
 }
+// Cronometro de la mecha: sube, no baja. Ambar por debajo del minimo de la mecha (zona segura),
+// rojo parpadeante desde el minimo (puede explotar en cualquier momento). El final exacto no se ve.
+function renderFuseClock() {
+  const elapsed = Math.max(0, performance.now() - game.fuseStart);
+  const danger = elapsed >= settings.fuseMin * 1000;
+  const t = $('timer');
+  t.textContent = (elapsed / 1000).toFixed(2);   // cronometro real: 16.45
+  t.classList.remove('urgent');
+  t.classList.toggle('safe', !danger);
+  t.classList.toggle('danger', danger);
+  document.body.classList.toggle('urgent', danger);
+}
 function tickEquilibrio() {
   if (!game || !game.waiting) return;
-  const elapsed = performance.now() - game.fuseStart;
-  const frac = elapsed / game.fuseMs;
-  const urgent = frac > 0.75;
-  $('timer').classList.toggle('urgent', urgent);
-  document.body.classList.toggle('urgent', urgent);
-  if (elapsed >= game.fuseMs) onTimeout();
+  renderFuseClock();
+  if (performance.now() - game.fuseStart >= game.fuseMs) onTimeout();
 }
 function scheduleBeepEquilibrio() {
   if (!game || !game.waiting) return;
@@ -993,10 +1078,11 @@ function startRound() {
   game.lastFace = 0;
   show('vPlay');
   $('bSimPass').hidden = !game.sim;
-  if (game.mode === 'equilibrio') {
+  if (isEq()) {
     armFuse();
     game.passes = 0; game.level = 1;
-    speak('Mecha nueva. Preparados.');
+    $('bSurrender').hidden = false;
+    speak(say('newFuse'));
     setTimeout(nextTurn, 1800);
   } else if (namedMode()) {
     speak(`Quedan ${alivePlayers().length}. Preparados.`);
@@ -1016,7 +1102,7 @@ function pickFace() {
 
 function nextTurn() {
   if (!game) return;
-  if (game.mode === 'equilibrio') { nextTurnEquilibrio(); return; }
+  if (isEq()) { nextTurnEquilibrio(); return; }
   game.turn++;
   const face = pickFace();
   const challenge = drawChallenge();
@@ -1082,6 +1168,7 @@ function stopTurnTimers() {
   clearInterval(game.tickTimer);
   clearTimeout(game.beepTimer);
   document.body.classList.remove('urgent');
+  $('timer').classList.remove('danger');
 }
 
 function onPass() {
@@ -1090,21 +1177,24 @@ function onPass() {
   stopTurnTimers();
   sfxSuccess();
   flash('flash-ok', 500);
-  speak('¡Pasalo!', 1.2);
+  if (!isEq()) speak('¡Pasalo!', 1.2);
   $('timeBar').style.width = '100%';
   $('holdBar').style.width = '100%';
   $('hint').textContent = '';
   if (game.mode === 'clasico' && game.turn > getRecord()) setRecord(game.turn);
-  if (game.mode === 'equilibrio') {
+  if (isEq()) {
     game.passes++;
     game.level = Math.min(4, 1 + Math.floor(game.passes / 2));
-    // la mecha sigue corriendo: la pausa es corta a proposito
-    setTimeout(nextTurn, 900);
+    const frac = (performance.now() - game.fuseStart) / game.fuseMs;
+    let key = 'passOk';
+    if (game.passes > 0 && game.passes % 3 === 0) key = 'passStreak';
+    else if (frac > 0.8) key = 'passClose';
+    // la mecha sigue corriendo mientras habla: la pausa es corta a proposito
+    speakThen(say(key), () => { if (game && !game.waiting) nextTurn(); }, 1800, 1.15);
     return;
   }
   game.limitMs = Math.max(settings.tMin * 1000, game.limitMs * settings.factor);
-  if (game.mode === 'azar') setTimeout(() => beginTurn(), 900);
-  else setTimeout(nextTurn, 1400);
+  setTimeout(nextTurn, 1400);
 }
 
 function onTimeout() {
@@ -1117,15 +1207,24 @@ function onTimeout() {
   $('bSimPass').hidden = true;
   $('hint').textContent = '';
 
-  const faltaba = game.mode === 'equilibrio' ? `Faltaba: ${game.challenge}.` : `Faltaba: cara ${faceLabel(game.face)} arriba, ${game.challenge}.`;
+  const faltaba = isEq() ? `Faltaba: ${game.challenge}.` : `Faltaba: cara ${faceLabel(game.face)} arriba, ${game.challenge}.`;
   $('boardWrap').hidden = true;
 
-  if (game.mode === 'equilibrio') {
+  if (isEq()) {
     const pen = drawPenance();
-    speak(`¡Boom! Prenda: ${pen}.`, 1.0);
+    const isRecord = game.passes > getRecordMecha() && game.passes > 0;
+    if (isRecord) setRecordMecha(game.passes);
+    const pair = game.mode === 'ojos';
+    let who = '', quien = pair ? 'Manos y ojos cumplen' : 'Quien tiene el cubo cumple';
+    if (usesNames() && game.lastName) {
+      who = pair && game.eyes ? `${game.lastName} y ${game.eyes}, ` : `${game.lastName}, `;
+      quien = pair && game.eyes ? `<b>${escapeHtml(game.lastName)}</b> y <b>${escapeHtml(game.eyes)}</b> cumplen` : `<b>${escapeHtml(game.lastName)}</b> cumple`;
+    }
+    speak(`${say('boom')} ${who}prenda: ${pen}.${isRecord ? ' ' + say('record') : ''}`, 1.0);
     $('overTitle').textContent = 'BOOM';
-    $('overBody').innerHTML = `Quien tiene el cubo cumple la prenda:<br><b style="font-size:24px">${escapeHtml(pen)}</b><br>
-      <span class="muted">${game.passes} pases en esta ronda. ${faltaba}</span>`;
+    $('overBody').innerHTML = `${quien} la prenda:<br><b style="font-size:24px">${escapeHtml(pen)}</b><br>
+      <span class="muted">${game.passes} pases en esta mecha${isRecord ? ', <b>nuevo record del grupo</b>' : ` (record ${getRecordMecha()})`}. ${faltaba}</span>`;
+    $('bSurrender').hidden = true;
     $('bNext').textContent = 'Siguiente ronda';
     $('bNext').onclick = startRound;
   } else if (namedMode()) {
@@ -1182,8 +1281,28 @@ function onTimeout() {
   show('vOver');
 }
 
+// Rendicion en Equilibrio: prenda inmediata, la mecha se pausa mientras se cumple, y el cubo pasa
+function onSurrender() {
+  if (!game || !isEq() || !game.waiting) return;
+  game.waiting = false;
+  stopTurnTimers();
+  if (!game.sim) sendClear();
+  const pen = drawPenance();
+  const pauseStart = performance.now();
+  $('challenge').textContent = `RENDICION · prenda: ${pen}`;
+  $('holdBar').style.width = '0%';
+  speak(`${say('surrender')} Prenda: ${pen}. Cuando termine, pasalo.`, 1.0);
+  const resumeMs = 6000;
+  setTimeout(() => {
+    if (!game) return;
+    game.fuseStart += performance.now() - pauseStart;   // la mecha no corre durante la prenda
+    nextTurn();
+  }, resumeMs);
+}
+
 function abortGame() {
-  if (game) { stopTurnTimers(); clearTimeout(game.transitTimer); if (!game.sim) sendClear(); }
+  if (game) { stopTurnTimers(); clearTimeout(game.transitTimer); clearTimeout(game.graceTimer); if (!game.sim) sendClear(); }
+  $('bSurrender').hidden = true;
   game = null;
   if (window.speechSynthesis) speechSynthesis.cancel();
   setBadge();
@@ -1255,6 +1374,7 @@ $('bBackRulesTop').onclick = () => show('vHome');
 $('bBackCal').onclick = () => { sendClear(); show('vHome'); };
 $('bAbort').onclick = abortGame;
 $('bSimPass').onclick = () => { if (game && game.sim) onPass(); };
+$('bSurrender').onclick = onSurrender;
 $('bHome').onclick = () => { game = null; setBadge(); show('vHome'); };
 document.addEventListener('keydown', (e) => { if (e.key === 'p' && game && game.sim) onPass(); });
 
