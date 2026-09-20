@@ -168,10 +168,13 @@
       <label>Mecha minima (s)<input id="sFuseMin" type="number" min="15" max="180" step="5"></label>
       <label>Mecha maxima (s)<input id="sFuseMax" type="number" min="20" max="300" step="5"></label>
       <label class="check"><input id="sCallNames" type="checkbox"> Llamar por nombre cuando hay jugadores cargados</label>
+      <label class="check"><input id="sBet" type="checkbox"> Apuesta del publico: el presentador pregunta "¿aguanta o cae?" en cada orden</label>
     </div>
     <div class="panel">
       <h3>Poses</h3>
       <div id="placePacksEdit"></div>
+      <label>Poses propias, una por linea: <b>Nombre | que hay que hacer | segundos | nivel 1 a 4</b><textarea id="sPlaces" placeholder="El Sumiller | en la palma, con el brazo en alto | 3 | 2&#10;La Cigüeña | sobre la rodilla, a la pata coja | 4 | 3"></textarea></label>
+      <div class="muted">Las poses que inventa el grupo entran en el mazo con las demas. Segundos de 1 a 10; si falta el nivel, se usa el 2.</div>
     </div>
     <div class="panel">
       <h3>Prendas al explotar</h3>
@@ -201,6 +204,8 @@
       <p><b>No lo sujetes.</b> Mientras el cubo cuenta, la mano que lo sostiene con los dedos extendidos y la otra mano abierta y a la vista. Si el cubo esta en la cabeza o el hombro, las dos manos abiertas y a la vista.</p>
       <p><b>No mires la pantalla</b> (solo en Ojos y Manos). Quien tiene el cubo juega a ciegas; quien lo paso mira por el.</p>
       <p>El grupo vigila las dos. Sin discusiones largas: la mecha corre.</p>
+      <p><b>Los demas apuestan.</b> Cuando el presentador pregunta "¿aguanta o cae?", quien no tiene el cubo grita su apuesta. No hay puntos: hay presion.</p>
+      <p><b>El objeto de la vergüenza.</b> La mesa elige un objeto, un sombrero, una cuchara, lo que haya. Quien explota lo lleva hasta la siguiente explosion.</p>
 
       <h2>Lo basico</h2>
       <p>El movil se deja en el centro de la mesa. Manda el movil, juzga el cubo, vigila el grupo.</p>
@@ -211,7 +216,7 @@
         <li>Barra llena: PASS. Pasa el cubo al siguiente. Antes de soltarlo puedes girarlo y desordenarlo.</li>
         <li><b>La mecha es compartida</b>: un unico tiempo para toda la ronda, que no se reinicia al pasar. Cada segundo que tardas en pasar lo quemas tu. El reloj cuenta hacia arriba: ambar mientras la mecha aun no puede explotar, rojo parpadeante cuando ya puede hacerlo en cualquier momento. Nadie sabe el segundo exacto. Los pitidos se aceleran.</li>
         <li>Cuando explota, quien tiene el cubo <b>cumple una prenda</b> que dicta el movil. Despues, mecha nueva.</li>
-        <li>Con cada pase las poses se ponen mas dificiles: palma, rodilla, dorso de la mano, antebrazo, hombro, cabeza, dos dedos.</li>
+        <li>Con cada pase las poses se ponen mas dificiles: palma, rodilla, dorso de la mano, antebrazo, hombro, cabeza, tres dedos.</li>
         <li>Si el cubo se cae, lo recoges y sigues. El tiempo no se para.</li>
         <li><b>Racha del grupo</b>: los pases seguidos en una misma mecha son el record de la mesa. Se anuncia al explotar.</li>
         <li><b>Rendicion</b>: si no puedes o no quieres, boton "Me rindo". Prenda inmediata, la mecha se detiene mientras la cumples, y el cubo pasa.</li>
@@ -231,6 +236,7 @@
         <li>Quien tiene el cubo son <b>las manos</b>: coloca, aguanta y no mira la pantalla.</li>
         <li>Quien acaba de pasar el cubo son <b>los ojos</b>: mira la pantalla, ve que cara detecta el cubo y como se llena la barra verde, y le grita a las manos: "girala, esa no, quieto, aguanta, ya, pasalo".</li>
         <li>El presentador dice los dos nombres si hay jugadores cargados: "¡Ana! Los ojos, Bruno." Sin nombres, la regla es fija: quien lo paso, a la pantalla.</li>
+        <li>Los ojos <b>ven el reloj de la mecha</b> y las manos no. Avisar de que esta en rojo, o callarse, es decision de los ojos.</li>
         <li>Si explota, la <b>prenda es para los dos</b>.</li>
       </ul>
 
@@ -238,7 +244,8 @@
       <ul>
         <li><b>Sensibilidad del cubo</b>: Suave perdona mas inclinacion y pide menos segundos; Estricto casi no perdona y pide mas. Es el dial de dificultad: no cambia las poses, cambia lo exigente que es el juez.</li>
         <li><b>Mecha</b>: entre que minimo y que maximo puede explotar. Por defecto de 40 a 80 segundos.</li>
-        <li><b>Poses</b>: Sentado, el mazo base; Mesa y de pie, con recorridos y levantarse. Cuidado con los vasos.</li>
+        <li><b>Poses</b>: Sentado, el mazo base; Mesa y de pie, con recorridos y levantarse. Cuidado con los vasos. Y las <b>poses propias</b> que escriba el grupo, que entran en el mazo con las demas.</li>
+        <li><b>Apuesta del publico</b>: se puede apagar en Ajustes si la mesa prefiere silencio.</li>
         <li><b>Prendas</b>: Fisicas, Sociales, y las que escriba el grupo, que suelen ser las mejores.</li>
       </ul>
 
@@ -247,6 +254,7 @@
         <li><b>Se me ha caido el cubo.</b> Lo recoges, lo vuelves a poner y el contador empieza de cero. El tiempo no se para.</li>
         <li><b>El cubo no detecta la cara.</b> Muevelo mas despacio y apoyalo plano. Si esta inclinado, no cuenta.</li>
         <li><b>Hay discusion sobre quien tenia el cubo al explotar.</b> Lo tenia quien lo tocaba. Si lo tocaban dos, la explosion es de quien lo recibia.</li>
+        <li><b>Solo tenemos iPhone.</b> Ningun navegador de iPhone tiene Bluetooth web. Instala Bluefy, un navegador que si lo tiene, y abre esta misma direccion. Con un Android en la mesa no hace falta nada.</li>
         <li><b>No se oye el movil.</b> Un altavoz Bluetooth pequeño emparejado al movil, en el centro de la mesa, lo resuelve. En un bar es casi obligatorio.</li>
       </ul>
     </div>
@@ -272,7 +280,7 @@
 'use strict';
 
 // ============================== Constantes ==============================
-const VERSION = 'PoC 0.8.1';
+const VERSION = 'PoC 0.9';
 const SERVICE_UUID = 'a5c0f000-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const STATUS_UUID  = 'a5c0f001-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
 const COMMAND_UUID = 'a5c0f002-1e6b-4c7a-9b2d-0f4e5a6b7c8d';
@@ -299,8 +307,14 @@ function applySensitivity(o) {
 const RECONNECT_GAP_MS = 1500;
 
 const MODES = {
-  equilibrio: { name: 'Equilibrio',   desc: 'Coloca el cubo en la cabeza, el dorso de la mano, el antebrazo... y aguanta quieto. Mecha compartida: el tiempo no se reinicia al pasar. Quien explota, prenda.' },
-  ojos:       { name: 'Ojos y Manos', desc: 'Como Equilibrio, pero quien tiene el cubo no mira la pantalla. Quien acaba de pasarlo mira por el y le grita: girala, quieto, aguanta, ya. Si explota, prenda para los dos.' },
+  equilibrio: { 
+    name: 'Equilibrio',   
+    desc: 'Coloca el cubo en la cabeza, el dorso de la mano, el antebrazo... y aguanta quieto. Mecha compartida: el tiempo no se reinicia al pasar. Quien explota, prenda.' 
+    },
+  ojos: {  
+    name: 'Ojos y Manos', 
+    desc: 'Como Equilibrio, pero quien tiene el cubo no mira la pantalla. Quien acaba de pasarlo mira por el y le grita: girala, quieto, aguanta, ya. Si explota, prenda para los dos.' 
+    },
 };
 
 // ---------- CONTENIDO EDITABLE ----------
@@ -318,7 +332,7 @@ const PLACES = {
       { n: 'El Loro',               t: 'en el hombro', tier: 2, hold: 3, tol: 85 },
       { n: 'El Faraon',             t: 'sobre la cabeza', tier: 2, hold: 3, tol: 85 },
       { n: 'El Camarero Estirado',  t: 'en el dorso de la mano, brazo estirado', tier: 2, hold: 3, tol: 92 },
-      { n: 'El Sastre',             t: 'sobre dos dedos', tier: 3, hold: 3, tol: 90 },
+      { n: 'El Sastre',             t: 'sobre tres dedos', tier: 3, hold: 3, tol: 90 },
       { n: 'El Camarero Ciego',     t: 'en el dorso de la mano, con los ojos cerrados', tier: 3, hold: 4, tol: 90 },
       { n: 'El Aplauso Real',       t: 'sobre la cabeza, mientras aplaudes', tier: 3, hold: 3, tol: 85 },
       { n: 'El Astronomo',          t: 'en el antebrazo, mirando al techo', tier: 3, hold: 4, tol: 90 },
@@ -366,23 +380,26 @@ const PENANCES = {
 };
 
 // Frases del presentador. Cortas: nunca retrasan la orden mas de un par de segundos.
+// Criterio: la burla apunta al fallo o al cubo, nunca a la persona; la guia buena se celebra.
 const PRESENTER = {
   intro: ['Bienvenidos a GraviFail. El cubo no perdona un temblor.', 'Silencio en la sala. El cubo juzga.', 'Manos firmes. La mecha es de todos.'],
-  rules: 'Dos reglas: no lo sujetes, manos abiertas y a la vista.',
-  rulesEyes: 'Dos reglas: no lo sujetes, y quien tiene el cubo no mira la pantalla.',
-  passOk: ['¡Pasalo!', '¡Limpio! Pasalo.', 'Aceptado. ¡Pasalo!', 'Ni un temblor. ¡Pasalo!'],
-  passClose: ['¡Por los pelos! Pasalo ya.', 'Eso ha sido justo. ¡Pasalo!', 'Casi te lo comes. ¡Pasalo!'],
+  rules: 'Dos reglas: no lo sujetes, manos abiertas y a la vista. Y los demas apuestan: aguanta o cae.',
+  rulesEyes: 'Dos reglas: no lo sujetes, y quien tiene el cubo no mira la pantalla. Los ojos ven el reloj: avisar o callar es cosa suya.',
+  bet: '¿Aguanta o cae?',
+  passOk: ['¡Pasalo!', '¡Limpio! Pasalo.', 'Aceptado. ¡Pasalo!', 'Ni un temblor. ¡Pasalo!', 'El cubo lo da por bueno. ¡Pasalo!'],
+  passClose: ['¡Por los pelos! Pasalo ya.', 'Eso ha sido justo. ¡Pasalo!', 'La mecha ya olia a quemado. ¡Pasalo!'],
   passStreak: ['Tres seguidos. El cubo empieza a respetaros.', 'Que racha. No os acostumbreis.', 'Impresionante. Ahora lo dificil.'],
-  boom: ['¡Boom! Ahi se quedo.', '¡Boom! El cubo ha hablado.', '¡Boom! Que temblor tan feo.', '¡Boom! Lo tenias y lo sabias.'],
+  passEyes: ['Buenos ojos. ¡Pasalo!', 'Asi se guia. ¡Pasalo!', 'Ojos y manos de acuerdo. ¡Pasalo!'],
+  boom: ['¡Boom! Ese temblor lo ha visto hasta la mesa de al lado.', '¡Boom! El cubo ha hablado.', '¡Boom! La mecha gano esta vez.', '¡Boom! El cubo no se movio solo, eh.'],
   record: ['Record del grupo. Enmarcadlo.', 'Nuevo record. Casi parece que sabeis jugar.'],
-  surrender: ['Rendicion aceptada. Hay prenda igual.', 'Te rindes. El cubo no olvida.'],
+  surrender: ['Rendicion aceptada. Hay prenda igual.', 'Retirada a tiempo. Hay prenda igual.'],
   newFuse: ['Mecha nueva. Nadie sabe cuando.', 'Otra mecha. Respirad ahora que podeis.', 'Mecha encendida. Suerte.'],
 };
 function say(key) { const a = PRESENTER[key]; return Array.isArray(a) ? a[Math.floor(Math.random() * a.length)] : a; }
 // ---------- FIN DEL CONTENIDO EDITABLE ----------
 
 const DEFAULTS = {
-  mode: 'equilibrio', names: [], callNames: true, sensitivity: 'normal',
+  mode: 'equilibrio', names: [], callNames: true, sensitivity: 'normal', bet: true, customPlaces: [],
   fuseMin: 40, fuseMax: 80, placePacks: ['sentado'], penancePacks: ['fisicas', 'sociales'], customPenances: [],
   holdS: 2.0,
   faces: [
@@ -439,7 +456,9 @@ function renderSettings() {
   $('sFuseMin').value = settings.fuseMin;
   $('sFuseMax').value = settings.fuseMax;
   $('sCallNames').checked = settings.callNames !== false;
+  $('sBet').checked = settings.bet !== false;
   $('sPenances').value = settings.customPenances.join('\n');
+  $('sPlaces').value = settings.customPlaces.map(o => `${o.n} | ${o.t} | ${o.hold} | ${o.tier}`).join('\n');
   $('sHold').value = settings.holdS;
   renderPackChecks('placePacksEdit', PLACES, settings.placePacks);
   renderPackChecks('penancePacksEdit', PENANCES, settings.penancePacks);
@@ -456,9 +475,11 @@ function readSettingsForm() {
   settings.fuseMin = clamp(parseInt($('sFuseMin').value, 10) || DEFAULTS.fuseMin, 15, 180);
   settings.fuseMax = clamp(parseInt($('sFuseMax').value, 10) || DEFAULTS.fuseMax, settings.fuseMin + 5, 300);
   settings.callNames = $('sCallNames').checked;
+  settings.bet = $('sBet').checked;
   const sens = $('sensEdit').querySelector('input:checked');
   settings.sensitivity = sens && SENSITIVITY[sens.value] ? sens.value : 'normal';
   settings.customPenances = $('sPenances').value.split('\n').map(x => x.trim()).filter(Boolean);
+  settings.customPlaces = parseCustomPlaces($('sPlaces').value);
   settings.holdS = clamp(parseFloat($('sHold').value) || DEFAULTS.holdS, 0.5, 5);
   settings.placePacks = Array.from($('placePacksEdit').querySelectorAll('input:checked')).map(i => i.dataset.pack);
   settings.penancePacks = Array.from($('penancePacksEdit').querySelectorAll('input:checked')).map(i => i.dataset.pack);
@@ -485,7 +506,7 @@ function renderHomeSummary() {
   const sv = SENSITIVITY[settings.sensitivity] || SENSITIVITY.normal;
   let mode = `${m.name}, sensibilidad ${sv.name.toLowerCase()}, mecha ${settings.fuseMin} a ${settings.fuseMax} s`;
   if (usesNames()) mode += `, llama por nombre a ${settings.names.length}`;
-  const packs = settings.placePacks.map(k => PLACES[k] ? PLACES[k].name : k).join(', ') || 'ninguno';
+  const packs = settings.placePacks.map(k => PLACES[k] ? PLACES[k].name : k).concat(settings.customPlaces.length ? [`${settings.customPlaces.length} propias`] : []).join(', ') || 'ninguno';
   const pens = settings.penancePacks.map(k => PENANCES[k] ? PENANCES[k].name : k).concat(settings.customPenances.length ? [`${settings.customPenances.length} propias`] : []).join(', ') || 'ninguna';
   $('homeSummary').innerHTML = `<b>${mode}</b><br>Poses: ${packs}<br>Prendas: ${pens}<br>
     Racha record del grupo: <b>${getRecordMecha()}</b> pases en una mecha`;
@@ -713,6 +734,7 @@ function pickVoice() {
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 function speak(text, rate = 1.05) {
+  document.body.dataset.lastSpeech = text;
   if (!('speechSynthesis' in window)) return null;
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
@@ -786,9 +808,22 @@ function shuffle(a) {
   for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
   return a;
 }
+// "Nombre | descripcion | segundos | nivel" por linea. Tolerancia 88 por defecto.
+function parseCustomPlaces(text) {
+  const out = [];
+  text.split('\n').forEach(line => {
+    const parts = line.split('|').map(x => x.trim());
+    if (parts.length < 2 || !parts[0] || !parts[1]) return;
+    const hold = clamp(parseFloat(parts[2]) || 3, 1, 10);
+    const tier = clamp(parseInt(parts[3], 10) || 2, 1, 4);
+    out.push({ n: parts[0].slice(0, 30), t: parts[1].slice(0, 80), hold, tier, tol: 88, custom: true });
+  });
+  return out;
+}
 function buildPlaceDeck() {
   let items = [];
   settings.placePacks.forEach(k => { if (PLACES[k]) items = items.concat(PLACES[k].items); });
+  items = items.concat(settings.customPlaces || []);
   if (!items.length) items = PLACES.sentado.items.slice();
   return items;
 }
@@ -874,7 +909,7 @@ function nextTurn() {
   renderCube();
 
   const rol = eyes ? `Los ojos, ${eyes}. ` : '';
-  const text = `${who ? `¡${who}! ${rol}` : ''}${o.n}: ${f ? `cara ${f.name} arriba, ` : 'cubo '}${o.t}. ${o.hold} segundos.`;
+  const text = `${who ? `¡${who}! ${rol}` : ''}${o.n}: ${f ? `cara ${f.name} arriba, ` : 'cubo '}${o.t}. ${o.hold} segundos.${settings.bet !== false ? ' ' + PRESENTER.bet : ''}`;
   speakThen(text, () => { game.graceTimer = setTimeout(() => armTurn(pauseAt, face, o), GRACE_MS); }, 4500);
 }
 function armTurn(pauseAt, face, o) {
@@ -938,6 +973,7 @@ function onPass() {
   let key = 'passOk';
   if (game.passes % 3 === 0) key = 'passStreak';
   else if (frac > 0.8) key = 'passClose';
+  else if (game.mode === 'ojos' && Math.random() < 0.5) key = 'passEyes';
   // la mecha sigue corriendo mientras habla: la pausa es corta a proposito
   speakThen(say(key), () => { if (game && !game.waiting) nextTurn(); }, 1800, 1.15);
 }
